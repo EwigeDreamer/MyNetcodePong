@@ -1,7 +1,9 @@
 using System;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using UniRx;
 using UnityEngine;
+using UnityEngine.UI;
 using VContainer;
 using VContainer.Unity;
 
@@ -26,6 +28,8 @@ namespace MyPong.Popups.Base
     public abstract class BasePopupWithController<TData, TController> : BasePopup, IInstaller
         where TController : BasePopupController
     {
+        [SerializeField] private Button _closeButton;
+        
         protected TData PopupData { get; private set; }
         protected TController Controller { get; private set; }
         
@@ -45,6 +49,8 @@ namespace MyPong.Popups.Base
         {
             if (data != null)
                 PopupData = (TData) data;
+            if (_closeButton != null)
+                _closeButton.OnClickAsObservable().Subscribe(_ => ClosePopup()).AddTo(this);
             InternalInit();
         }
 
@@ -109,7 +115,7 @@ namespace MyPong.Popups.Base
         protected virtual Tween GetShowingTween()
         {
             float duration = 0.25f;
-            var minScale = Vector3.one * 0.9f;
+            var minScale = Vector3.one * 1.1f;
             return DOTween.Sequence()
                 .AppendCallback(() =>
                 {
@@ -125,7 +131,7 @@ namespace MyPong.Popups.Base
         protected virtual Tween GetHidingTween()
         {
             float duration = 0.25f;
-            var minScale = Vector3.one * 0.9f;
+            var minScale = Vector3.one * 1.1f;
             return DOTween.Sequence()
                 .Append(CanvasGroup.DOFade(0f, duration)
                     .SetEase(Ease.InSine))

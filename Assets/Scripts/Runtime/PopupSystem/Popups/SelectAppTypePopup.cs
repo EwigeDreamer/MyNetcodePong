@@ -25,16 +25,16 @@ namespace MyPong.Popups
     
     public class SelectAppTypePopup : BasePopupWithController<SelectAppTypePopup.Data, SelectAppTypePopupController>
     {
-        [SerializeField] private Button _HostButton;
-        [SerializeField] private Button _ClientButton;
+        [SerializeField] private Button _hostButton;
+        [SerializeField] private Button _clientButton;
 
         public override bool IsUnclosable => false;
         public override bool IsOnlyOne => false;
 
         protected override void InternalInit()
         {
-            _HostButton.OnClickAsObservable().Subscribe(_ => Controller.OpenHostSettings()).AddTo(this);
-            _ClientButton.OnClickAsObservable().Subscribe(_ => Controller.OpenClientSettings()).AddTo(this);
+            _hostButton.OnClickAsObservable().Subscribe(_ => Controller.OpenHostSettings()).AddTo(this);
+            _clientButton.OnClickAsObservable().Subscribe(_ => Controller.OpenClientSettings()).AddTo(this);
         }
         
         public override void Dispose()
