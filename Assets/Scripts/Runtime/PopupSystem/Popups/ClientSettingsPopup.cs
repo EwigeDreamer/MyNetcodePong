@@ -57,6 +57,7 @@ namespace MyPong.Popups
 
         protected override void InternalInit()
         {
+            _ipField.text = NetworkUtility.GetLocalIPv4();
             _connectButton
                 .OnClickAsObservable()
                 .Subscribe(_ => Controller.StartClient(_ipField.text, _portField.text))
