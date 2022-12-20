@@ -37,6 +37,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - ui
+  - m_GUID: 870603b79d5bf401ea2bc91c2539682d
+    m_Address: UI/Popups/GameHudPopup
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ui
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: b868af7ab74f44f9d94f1c59b20f93c4, type: 2}
   m_SchemaSet:
