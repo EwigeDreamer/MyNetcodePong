@@ -7,6 +7,8 @@ namespace MyPong
 {
     public class BootstrapScope : LifetimeScope
     {
+        [SerializeField] private NetworkManager _networkManager;
+        
         protected override void Awake()
         {
             IsRoot = true;
@@ -16,6 +18,8 @@ namespace MyPong
 
         protected override void Configure(IContainerBuilder builder)
         {
+            builder.Register<UnetWrapper>(Lifetime.Singleton).WithParameter(_networkManager);
+            
             builder.RegisterEntryPoint<BootstrapFlow>();
         }
     }

@@ -1,8 +1,7 @@
-using MyPong.Popups;
+using Cysharp.Threading.Tasks;
 using MyPong.Popups.Base;
 using TMPro;
 using UniRx;
-using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,12 +9,30 @@ namespace MyPong.Popups
 {
     public class ClientSettingsPopupController : BasePopupController
     {
-        public ClientSettingsPopupController(PopupService popupService) : base(popupService) { }
+        public readonly UnetWrapper UnetWrapper;
+        
+        public ClientSettingsPopupController(
+            PopupService popupService,
+            UnetWrapper unetWrapper)
+            : base(popupService)
+        {
+            UnetWrapper = unetWrapper;
+        }
 
         public void StartClient(string ip, string port)
         {
-            var nm = NetworkManager.Singleton;
-            Debug.LogError($"(fake) CONNECT TO: {ip}:{port}");
+            // Debug.LogError($"(fake) CONNECT TO: {ip}:{port} {UnetWrapper != null}");
+            if (!NetworkUtility.IsValidIPv4(ip))
+            {
+                PopupService.OpenPopup<MessagePopup>(new MessagePopup.Data("Invalid IP address!")).Forget();
+                return;
+            }
+            if (!NetworkUtility.IsValidPort(port))
+            {
+                PopupService.OpenPopup<MessagePopup>(new MessagePopup.Data("Invalid port!")).Forget();
+                return;
+            }
+            UnetWrapper.StartClient(ip, port);
         }
     }
 
@@ -36,13 +53,8 @@ namespace MyPong.Popups
                 .AddTo(this);
         }
 
-        public override void Dispose()
-        {
+        public override void Dispose() { }
 
-        }
-
-        public class Data : IPopupData
-        {
-        }
+        public class Data : IPopupData { }
     }
 }

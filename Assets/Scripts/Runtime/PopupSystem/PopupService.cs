@@ -9,30 +9,37 @@ using Object = UnityEngine.Object;
 
 namespace MyPong.Popups
 {
+    [UnityEngine.Scripting.Preserve]
     public class PopupService
     {
         private readonly LifetimeScope ParentScope;
-        private readonly PopupCanvas PopupCanvas;
+        private readonly PopupCanvas _popupCanvas;
 
         public PopupService(LifetimeScope parentScope, PopupCanvas popupCanvas)
         {
             ParentScope = parentScope;
-            PopupCanvas = popupCanvas;
+            _popupCanvas = popupCanvas;
         }
 
 
         private readonly StackLikeList<PopupScopeWrapper> _popups = new();
 
-        private bool _inProgress = false;
+        private bool _inProcess = false;
 
-        public async UniTask<T> OpenPopup<T>(IPopupData data = null) where T : BasePopup
+        public async UniTask OpenPopup<T>(IPopupData data = null) where T : BasePopup
         {
-            await UniTask.WaitWhile(() => _inProgress);
-            _inProgress = true;
+            await UniTask.WaitWhile(() => _inProcess);
 
+            if (!CanOpenNew<T>())
+            {
+                Debug.LogError($"Can't open another {typeof(T).Name}, because it can be only one!");
+                return;
+            }
+            
+            _inProcess = true;
             var prefab = await AssertService.LoadGameobjectFromAddressablesAsync<T>(ResourceType.Popup);
-            var prevPopup = _popups.TryPeek(out var x) ? x.BasePopup : null;
-            var nextPopup = Object.Instantiate(prefab, PopupCanvas.PopupContainer);
+            var prevPopup = _popups.TryPeek(out var x) ? x.Popup : null;
+            var nextPopup = Object.Instantiate(prefab, _popupCanvas.PopupContainer);
             var scope = TryInject(nextPopup);
             _popups.Push(new PopupScopeWrapper(nextPopup, scope));
             nextPopup.Init(data);
@@ -41,28 +48,35 @@ namespace MyPong.Popups
             var showingTask = nextPopup.Show();
 
             await UniTask.WhenAll(hidingTask, showingTask);
-            _inProgress = false;
-            return nextPopup;
+            _inProcess = false;
         }
 
         public async UniTask ClosePopup(BasePopup basePopup)
         {
             if (basePopup == null) return;
             if (basePopup.IsUnclosable) return;
-            await UniTask.WaitUntil(() => _inProgress == false);
-            _inProgress = true;
-
-            var facade = _popups.FirstOrDefault(a => a.BasePopup == basePopup);
+            await UniTask.WaitUntil(() => _inProcess == false);
+            
+            _inProcess = true;
+            var facade = _popups.FirstOrDefault(a => a.Popup == basePopup);
             _popups.Remove(facade);
 
             var hidingTask = basePopup.Hide();
-            var showingTask = _popups.TryPeek(out var last) && !last.BasePopup.IsOpened
-                ? last.BasePopup.Show()
+            var showingTask = _popups.TryPeek(out var last) && !last.Popup.IsOpened
+                ? last.Popup.Show()
                 : UniTask.CompletedTask;
 
             await UniTask.WhenAll(hidingTask, showingTask);
             facade?.Dispose();
-            _inProgress = false;
+            _inProcess = false;
+        }
+
+        private bool CanOpenNew<T>() where T : BasePopup
+        {
+            foreach(var p in _popups)
+                if (p.Popup is T && p.Popup.IsOnlyOne)
+                    return false;
+            return true;
         }
 
         private LifetimeScope TryInject<T>(T popup) where T : BasePopup
@@ -80,20 +94,20 @@ namespace MyPong.Popups
     
     public class PopupScopeWrapper : IDisposable
     {
-        public readonly BasePopup BasePopup;
+        public readonly BasePopup Popup;
         private readonly LifetimeScope Scope;
 
-        public PopupScopeWrapper(BasePopup basePopup, LifetimeScope scope)
+        public PopupScopeWrapper(BasePopup popup, LifetimeScope scope)
         {
-            BasePopup = basePopup;
+            Popup = popup;
             Scope = scope;
         }
 
         public void Dispose()
         {
-            BasePopup.Dispose();
-            if (BasePopup != null)
-                UnityEngine.Object.Destroy(BasePopup.gameObject);
+            Popup.Dispose();
+            if (Popup != null)
+                Object.Destroy(Popup.gameObject);
 
             if (Scope != null)
                 Scope.Dispose();

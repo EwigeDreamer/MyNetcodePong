@@ -1,8 +1,7 @@
-using MyPong.Popups;
+using Cysharp.Threading.Tasks;
 using MyPong.Popups.Base;
 using TMPro;
 using UniRx;
-using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,13 +9,26 @@ namespace MyPong.Popups
 {
     public class HostSettingsPopupController : BasePopupController
     {
-        public HostSettingsPopupController(PopupService popupService) : base(popupService) { }
+        public readonly UnetWrapper UnetWrapper;
+        
+        public HostSettingsPopupController(
+            PopupService popupService,
+            UnetWrapper unetWrapper)
+            : base(popupService)
+        {
+            UnetWrapper = unetWrapper;
+        }
 
         public void StartHost(string port)
         {
-            var nm = NetworkManager.Singleton;
-            var ip = NetworkUtility.GetLocalIPv4();
-            Debug.LogError($"(fake) START HOST: {ip}:{port}");
+            // var ip = NetworkUtility.GetLocalIPv4();
+            // Debug.LogError($"(fake) START HOST: {ip}:{port} {UnetWrapper != null}");
+            if (!NetworkUtility.IsValidPort(port))
+            {
+                PopupService.OpenPopup<MessagePopup>(new MessagePopup.Data("Invalid port!")).Forget();
+                return;
+            }
+            UnetWrapper.StartHost(port);
         }
     }
 
@@ -38,13 +50,8 @@ namespace MyPong.Popups
                 .AddTo(this);
         }
 
-        public override void Dispose()
-        {
+        public override void Dispose() { }
 
-        }
-
-        public class Data : IPopupData
-        {
-        }
+        public class Data : IPopupData { }
     }
 }

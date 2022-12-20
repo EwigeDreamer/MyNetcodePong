@@ -12,8 +12,7 @@ namespace MyPong
         protected override void Configure(IContainerBuilder builder)
         {
             builder.RegisterComponentInNewPrefab(_popupCanvasPrefab, Lifetime.Singleton);
-            builder.Register<PopupService>(Lifetime.Singleton)
-                .WithParameter(this);
+            builder.Register<PopupService>(Lifetime.Singleton).WithParameter(this);
 
             builder.RegisterEntryPoint<GameFlow>();
         }
