@@ -4,9 +4,11 @@ using TMPro;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
+using Utilities.Network;
 
 namespace MyPong.Popups
 {
+    [UnityEngine.Scripting.Preserve]
     public class ClientSettingsPopupController : BasePopupController
     {
         public readonly UnetWrapper UnetWrapper;
@@ -32,7 +34,15 @@ namespace MyPong.Popups
                 PopupService.OpenPopup<MessagePopup>(new MessagePopup.Data("Invalid port!")).Forget();
                 return;
             }
-            UnetWrapper.StartClient(ip, port);
+
+            if (UnetWrapper.StartClient(ip, port))
+            {
+                PopupService.OpenPopup<GameHudPopup>(new GameHudPopup.Data()).Forget();
+            }
+            else
+            {
+                PopupService.OpenPopup<MessagePopup>(new MessagePopup.Data("Something went wrong!")).Forget();
+            }
         }
     }
 

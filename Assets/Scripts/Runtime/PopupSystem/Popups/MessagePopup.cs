@@ -1,4 +1,3 @@
-using MyPong.Popups;
 using MyPong.Popups.Base;
 using TMPro;
 using UniRx;
@@ -7,6 +6,7 @@ using UnityEngine.UI;
 
 namespace MyPong.Popups
 {
+    [UnityEngine.Scripting.Preserve]
     public class MessagePopupController : BasePopupController
     {
         public MessagePopupController(PopupService popupService) : base(popupService) { }

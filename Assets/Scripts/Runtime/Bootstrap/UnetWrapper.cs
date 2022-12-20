@@ -1,23 +1,38 @@
 using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
+using Utilities.Network;
 
 public class UnetWrapper
 {
     public readonly NetworkManager NetworkManager;
 
-    public NetworkTransport Transport => NetworkManager.NetworkConfig.NetworkTransport; 
+    public UnityTransport Transport => NetworkManager.NetworkConfig.NetworkTransport as UnityTransport; 
+    public bool IsRunning => NetworkManager.IsServer || NetworkManager.IsClient;
     
     public UnetWrapper(NetworkManager networkManager)
     {
         NetworkManager = networkManager;
     }
 
-    public void StartClient(string ip, string port)
+    public bool StartClient(string ip, string portStr)
     {
+        if (!NetworkUtility.IsValidIPv4(ip)) return false;
+        if (!NetworkUtility.IsValidPort(portStr)) return false;
+
+        var port = ushort.Parse(portStr);
         
+        Transport.SetConnectionData(ip, port);
+        return NetworkManager.StartClient();
     }
 
-    public void StartHost(string port)
+    public bool StartHost(string portStr)
     {
-        
+        if (!NetworkUtility.IsValidPort(portStr)) return false;
+
+        var ip = NetworkUtility.GetLocalIPv4();
+        var port = ushort.Parse(portStr);
+
+        Transport.SetConnectionData(ip, port);
+        return NetworkManager.StartHost();
     }
 }

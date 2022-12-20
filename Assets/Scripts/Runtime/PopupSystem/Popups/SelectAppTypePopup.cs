@@ -8,6 +8,7 @@ using UnityEngine.UI;
 
 namespace MyPong.Popups
 {
+    [UnityEngine.Scripting.Preserve]
     public class SelectAppTypePopupController : BasePopupController
     {
         public SelectAppTypePopupController(PopupService popupService) : base(popupService) { }
@@ -28,7 +29,7 @@ namespace MyPong.Popups
         [SerializeField] private Button _hostButton;
         [SerializeField] private Button _clientButton;
 
-        public override bool IsUnclosable => false;
+        public override bool IsUnclosable => true;
         public override bool IsOnlyOne => false;
 
         protected override void InternalInit()

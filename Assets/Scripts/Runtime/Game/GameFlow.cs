@@ -7,10 +7,14 @@ namespace MyPong
     public class GameFlow : IStartable
     {
         private readonly PopupService PopupService;
+        private readonly UnetWrapper UnetWrapper;
 
-        public GameFlow(PopupService popupService)
+        public GameFlow(
+            PopupService popupService,
+            UnetWrapper unetWrapper)
         {
             PopupService = popupService;
+            UnetWrapper = unetWrapper;
         }
 
         public void Start()

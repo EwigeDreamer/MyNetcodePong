@@ -18,7 +18,8 @@ namespace MyPong
 
         protected override void Configure(IContainerBuilder builder)
         {
-            builder.Register<UnetWrapper>(Lifetime.Singleton).WithParameter(_networkManager);
+            builder.RegisterComponent(_networkManager).AsSelf();
+            builder.Register<UnetWrapper>(Lifetime.Singleton);
             
             builder.RegisterEntryPoint<BootstrapFlow>();
         }

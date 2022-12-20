@@ -1,3 +1,4 @@
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using VContainer.Unity;
 
@@ -7,6 +8,9 @@ namespace MyPong
     {
         public void Start()
         {
+            QualitySettings.vSyncCount = 0;
+            Application.targetFrameRate = 30;
+            
             SceneManager.LoadScene(Constants.Scenes.Core);
         }
     }

@@ -1,29 +1,32 @@
 using System.Net;
 using System.Text.RegularExpressions;
 
-public static class NetworkUtility
+namespace Utilities.Network
 {
-    public static string GetLocalIPv4()
+    public static class NetworkUtility
     {
-        var host = Dns.GetHostEntry(System.Net.Dns.GetHostName());
-        foreach (var ip in host.AddressList)
+        public static string GetLocalIPv4()
         {
-            if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+            var host = Dns.GetHostEntry(System.Net.Dns.GetHostName());
+            foreach (var ip in host.AddressList)
             {
-                return ip.ToString();
+                if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                {
+                    return ip.ToString();
+                }
             }
+
+            throw new System.Exception("No network adapters with an IPv4 address in the system!");
         }
 
-        throw new System.Exception("No network adapters with an IPv4 address in the system!");
-    }
+        public static bool IsValidIPv4(string ip)
+        {
+            return Regex.IsMatch(ip, @"^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$");
+        }
 
-    public static bool IsValidIPv4(string ip)
-    {
-        return Regex.IsMatch(ip, @"^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$");
-    }
-
-    public static bool IsValidPort(string port)
-    {
-        return ushort.TryParse(port, out _);
+        public static bool IsValidPort(string port)
+        {
+            return ushort.TryParse(port, out _);
+        }
     }
 }
