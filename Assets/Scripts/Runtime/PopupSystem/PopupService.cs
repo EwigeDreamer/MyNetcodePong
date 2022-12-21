@@ -71,6 +71,13 @@ namespace MyPong.Popups
             _inProcess = false;
         }
 
+        public async UniTask CloseAll<T>() where T : BasePopup
+        {
+            foreach (var p in _popups.Select(a => a).Reverse())
+                if (p.Popup is T)
+                    await ClosePopup(p.Popup);
+        }
+
         private bool CanOpenNew<T>() where T : BasePopup
         {
             foreach(var p in _popups)

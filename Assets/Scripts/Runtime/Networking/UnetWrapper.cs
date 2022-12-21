@@ -1,3 +1,5 @@
+using System;
+using UniRx;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
@@ -9,6 +11,9 @@ namespace MyPong
     {
         public readonly NetworkManager NetworkManager;
 
+        private Subject<Unit> _onConnect = new();
+        private Subject<Unit> _onDisconnect = new();
+
         public UnityTransport Transport => NetworkManager.NetworkConfig.NetworkTransport as UnityTransport;
         public bool IsRunning => NetworkManager.IsServer || NetworkManager.IsClient;
 
@@ -19,6 +24,9 @@ namespace MyPong
             NetworkManager.OnTransportFailure += () => Debug.LogError(nameof(NetworkManager.OnTransportFailure));
             NetworkManager.OnClientConnectedCallback += id => Debug.LogError($"{nameof(NetworkManager.OnClientConnectedCallback)}: {id} {id == NetworkManager.LocalClientId}");
             NetworkManager.OnClientDisconnectCallback += id => Debug.LogError($"{nameof(NetworkManager.OnClientDisconnectCallback)}: {id} {id == NetworkManager.LocalClientId}");
+
+            NetworkManager.OnClientConnectedCallback += id => _onConnect.OnNext(default);
+            // NetworkManager.OnClientDisconnectCallback += id => 
         }
 
         public bool StartClient(string ip, string portStr)
@@ -51,7 +59,7 @@ namespace MyPong
             Debug.LogError($"CHECK CONNECTION {NetworkManager.ConnectedClientsIds.Count}");
             
             
-            if (NetworkManager.ConnectedClientsIds.Count < 1 || request.ClientNetworkId == NetworkManager.LocalClientId)
+            if (NetworkManager.ConnectedClientsIds.Count < 2 || request.ClientNetworkId == NetworkManager.LocalClientId)
             {
                 response.Approved = true;
                 response.CreatePlayerObject = true;
