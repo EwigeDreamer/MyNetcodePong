@@ -36,7 +36,6 @@ namespace MyPong
             var port = ushort.Parse(portStr);
 
             Transport.SetConnectionData(ip, port);
-            NetworkManager.NetworkConfig.ConnectionApproval = true;
             NetworkManager.ConnectionApprovalCallback = ApprovalCheck;
             return NetworkManager.StartHost();
         }
