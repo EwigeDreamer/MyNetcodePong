@@ -13,9 +13,14 @@ namespace MyPong
 
         private Subject<Unit> _onConnect = new();
         private Subject<Unit> _onDisconnect = new();
+        public IObservable<Unit> OnConnect => _onConnect;
+        public IObservable<Unit> OnDisconnect => _onDisconnect;
 
         public UnityTransport Transport => NetworkManager.NetworkConfig.NetworkTransport as UnityTransport;
-        public bool IsRunning => NetworkManager.IsServer || NetworkManager.IsClient;
+        public bool IsServer => NetworkManager.IsServer;
+        public bool IsClient => NetworkManager.IsClient;
+        public bool IsRunning => IsServer || IsClient;
+        public bool ItsMe(ulong id) => id == NetworkManager.LocalClientId;
 
         public UnetWrapper(NetworkManager networkManager)
         {
@@ -25,10 +30,10 @@ namespace MyPong
             NetworkManager.OnClientConnectedCallback += id => Debug.LogError($"{nameof(NetworkManager.OnClientConnectedCallback)}: {id} {id == NetworkManager.LocalClientId}");
             NetworkManager.OnClientDisconnectCallback += id => Debug.LogError($"{nameof(NetworkManager.OnClientDisconnectCallback)}: {id} {id == NetworkManager.LocalClientId}");
 
-            NetworkManager.OnClientConnectedCallback += id => _onConnect.OnNext(default);
-            // NetworkManager.OnClientDisconnectCallback += id => 
+            NetworkManager.OnClientConnectedCallback += _ => _onConnect.OnNext(default);
+            NetworkManager.OnClientDisconnectCallback += id => { if (!IsServer || ItsMe(id)) _onDisconnect.OnNext(default); };
         }
-
+        
         public bool StartClient(string ip, string portStr)
         {
             if (!NetworkUtility.IsValidIPv4(ip)) return false;

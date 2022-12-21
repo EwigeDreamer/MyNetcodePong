@@ -23,19 +23,12 @@ namespace MyPong.Popups
 
         public void StartHost(string port)
         {
-            // var ip = NetworkUtility.GetLocalIPv4();
-            // Debug.LogError($"(fake) START HOST: {ip}:{port} {UnetWrapper != null}");
             if (!NetworkUtility.IsValidPort(port))
             {
                 PopupService.OpenPopup<MessagePopup>(new MessagePopup.Data("Invalid port!")).Forget();
                 return;
             }
-
-            if (UnetWrapper.StartHost(port))
-            {
-                PopupService.OpenPopup<GameHudPopup>(new GameHudPopup.Data()).Forget();
-            }
-            else
+            if (!UnetWrapper.StartHost(port))
             {
                 PopupService.OpenPopup<MessagePopup>(new MessagePopup.Data("Something went wrong!")).Forget();
             }

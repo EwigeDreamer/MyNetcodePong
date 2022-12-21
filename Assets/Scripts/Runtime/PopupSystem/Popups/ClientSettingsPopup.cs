@@ -23,7 +23,6 @@ namespace MyPong.Popups
 
         public void StartClient(string ip, string port)
         {
-            // Debug.LogError($"(fake) CONNECT TO: {ip}:{port} {UnetWrapper != null}");
             if (!NetworkUtility.IsValidIPv4(ip))
             {
                 PopupService.OpenPopup<MessagePopup>(new MessagePopup.Data("Invalid IP address!")).Forget();
@@ -34,12 +33,7 @@ namespace MyPong.Popups
                 PopupService.OpenPopup<MessagePopup>(new MessagePopup.Data("Invalid port!")).Forget();
                 return;
             }
-
-            if (UnetWrapper.StartClient(ip, port))
-            {
-                PopupService.OpenPopup<GameHudPopup>(new GameHudPopup.Data()).Forget();
-            }
-            else
+            if (!UnetWrapper.StartClient(ip, port))
             {
                 PopupService.OpenPopup<MessagePopup>(new MessagePopup.Data("Something went wrong!")).Forget();
             }
