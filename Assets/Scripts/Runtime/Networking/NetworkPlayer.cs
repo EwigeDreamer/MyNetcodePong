@@ -24,7 +24,7 @@ namespace MyPong
 
         public override void OnNetworkDespawn()
         {
-            var log = $"DESPAWN!!! {IsOwner}".Bold().Color(Color.yellow) + "\n";
+            var log = $"DESPAWN!!!".Bold().Color(Color.yellow) + "\n";
             log += $"{nameof(IsOwner)}: {IsOwner}\n";
             log += $"{nameof(IsServer)}: {IsServer}\n";
             log += $"{nameof(IsClient)}: {IsClient}\n";
