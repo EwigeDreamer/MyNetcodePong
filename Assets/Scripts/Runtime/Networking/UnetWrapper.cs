@@ -51,20 +51,10 @@ namespace MyPong
             {
                 response.Approved = true;
                 response.CreatePlayerObject = true;
-                response.PlayerPrefabHash = null;
-                response.Position = null;
-                response.Rotation = null;
-                response.Pending = false;
-                response.Reason = null;
             }
             else
             {
                 response.Approved = false;
-                response.CreatePlayerObject = false;
-                response.PlayerPrefabHash = null;
-                response.Position = null;
-                response.Rotation = null;
-                response.Pending = false;
                 response.Reason = "Server is full";
             }
         }
