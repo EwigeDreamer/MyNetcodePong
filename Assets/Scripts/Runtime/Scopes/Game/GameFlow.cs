@@ -11,7 +11,7 @@ namespace MyPong
         private readonly PopupService PopupService;
         private readonly UnetWrapper UnetWrapper;
 
-        private CompositeDisposable _disposables;
+        private CompositeDisposable _disposables = new();
 
         public GameFlow(
             PopupService popupService,
