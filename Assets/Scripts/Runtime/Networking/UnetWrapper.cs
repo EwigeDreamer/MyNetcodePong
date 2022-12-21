@@ -15,6 +15,10 @@ namespace MyPong
         public UnetWrapper(NetworkManager networkManager)
         {
             NetworkManager = networkManager;
+            NetworkManager.OnServerStarted += () => Debug.LogError(nameof(NetworkManager.OnServerStarted));
+            NetworkManager.OnTransportFailure += () => Debug.LogError(nameof(NetworkManager.OnTransportFailure));
+            NetworkManager.OnClientConnectedCallback += id => Debug.LogError(nameof(NetworkManager.OnClientConnectedCallback));
+            NetworkManager.OnClientDisconnectCallback += id => Debug.LogError(nameof(NetworkManager.OnClientDisconnectCallback));
         }
 
         public bool StartClient(string ip, string portStr)
