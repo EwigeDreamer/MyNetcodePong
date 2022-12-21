@@ -1,5 +1,6 @@
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
+using UnityEngine;
 using Utilities.Network;
 
 namespace MyPong
@@ -35,7 +36,28 @@ namespace MyPong
             var port = ushort.Parse(portStr);
 
             Transport.SetConnectionData(ip, port);
+            NetworkManager.NetworkConfig.ConnectionApproval = true;
+            NetworkManager.ConnectionApprovalCallback = ApprovalCheck;
             return NetworkManager.StartHost();
+        }
+
+        private void ApprovalCheck(
+            NetworkManager.ConnectionApprovalRequest request,
+            NetworkManager.ConnectionApprovalResponse response)
+        {
+            Debug.LogError($"CHECK CONNECTION {NetworkManager.ConnectedClientsIds.Count}");
+            
+            
+            if (NetworkManager.ConnectedClientsIds.Count < 1 || request.ClientNetworkId == NetworkManager.LocalClientId)
+            {
+                response.Approved = true;
+                response.CreatePlayerObject = true;
+            }
+            else
+            {
+                response.Approved = false;
+                response.Reason = "Server is full";
+            }
         }
     }
 }
