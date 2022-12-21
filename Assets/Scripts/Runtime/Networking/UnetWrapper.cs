@@ -17,8 +17,8 @@ namespace MyPong
             NetworkManager = networkManager;
             NetworkManager.OnServerStarted += () => Debug.LogError(nameof(NetworkManager.OnServerStarted));
             NetworkManager.OnTransportFailure += () => Debug.LogError(nameof(NetworkManager.OnTransportFailure));
-            NetworkManager.OnClientConnectedCallback += id => Debug.LogError(nameof(NetworkManager.OnClientConnectedCallback));
-            NetworkManager.OnClientDisconnectCallback += id => Debug.LogError(nameof(NetworkManager.OnClientDisconnectCallback));
+            NetworkManager.OnClientConnectedCallback += id => Debug.LogError($"{nameof(NetworkManager.OnClientConnectedCallback)}: {id} {id == NetworkManager.LocalClientId}");
+            NetworkManager.OnClientDisconnectCallback += id => Debug.LogError($"{nameof(NetworkManager.OnClientDisconnectCallback)}: {id} {id == NetworkManager.LocalClientId}");
         }
 
         public bool StartClient(string ip, string portStr)
