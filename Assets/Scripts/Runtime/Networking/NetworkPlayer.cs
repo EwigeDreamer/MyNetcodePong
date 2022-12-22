@@ -1,5 +1,4 @@
 using Extensions.Strings;
-using Sirenix.OdinInspector;
 using Unity.Netcode;
 using UnityEngine;
 

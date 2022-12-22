@@ -1,5 +1,4 @@
 using System;
-using Cysharp.Threading.Tasks;
 using MyPong.UI;
 using MyPong.UI.Popups;
 using VContainer.Unity;

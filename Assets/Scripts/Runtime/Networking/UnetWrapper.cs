@@ -26,8 +26,6 @@ namespace MyPong
         public bool IsRunning => IsServer || IsClient;
         public bool ItsMe(ulong id) => id == NetworkManager.LocalClientId;
 
-        private Tween _connectWaiter = null;
-
         public UnetWrapper(
             NetworkManager networkManager,
             ScreenLocker screenLocker)
@@ -44,17 +42,18 @@ namespace MyPong
             NetworkManager.OnClientDisconnectCallback += OnClientDisconnect;
         }
 
+
+        private Tween _connectWaiter = null;
         private void StartConnectWaiter()
         {
-            StopConnectWaiter();
             var connectTimeout = Transport.ConnectTimeoutMS * Transport.MaxConnectAttempts / 1000f;
-            _connectWaiter = DOTween.Sequence()
-                .AppendCallback(() => ScreenLocker.Show(ScreenLockTypes.Unet))
-                .Append(DOTweenUtility.Delay(connectTimeout + 1f))
-                .AppendCallback(() => ScreenLocker.Hide(ScreenLockTypes.Unet))
+            if (_connectWaiter != null)
+                _connectWaiter.Kill(true);
+            _connectWaiter = DOTweenUtility.Delay(connectTimeout + 1f)
+                .OnStart(() => ScreenLocker.Show(ScreenLockTypes.Unet))
+                .OnComplete(() => ScreenLocker.Hide(ScreenLockTypes.Unet))
                 .Play();
         }
-
         private void StopConnectWaiter()
         {
             if (_connectWaiter != null)
@@ -106,9 +105,6 @@ namespace MyPong
             NetworkManager.ConnectionApprovalRequest request,
             NetworkManager.ConnectionApprovalResponse response)
         {
-            Debug.LogError($"CHECK CONNECTION {NetworkManager.ConnectedClientsIds.Count}");
-            
-            
             if (NetworkManager.ConnectedClientsIds.Count < 2 || request.ClientNetworkId == NetworkManager.LocalClientId)
             {
                 response.Approved = true;
