@@ -15,7 +15,7 @@ namespace Utilities
     {
         private const string POPUP_PREFABS_PATH = "UI/Popups";
 
-        public static async UniTask<T> LoadGameobjectFromAddressablesAsync<T>(ResourceType type, string name = "")
+        public static async UniTask<T> LoadGameObjectFromAddressablesAsync<T>(ResourceType type, string name = "")
             where T : Object
         {
             name = string.IsNullOrWhiteSpace(name) ? typeof(T).Name : name;
