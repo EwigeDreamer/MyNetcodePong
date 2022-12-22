@@ -1,13 +1,14 @@
 using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
-using MyPong.Popups.Base;
+using MyPong.UI.Popups.Base;
+using MyPong.UI.Popups.Misc;
 using UnityEngine;
 using Utilities;
 using VContainer.Unity;
 using Object = UnityEngine.Object;
 
-namespace MyPong.Popups
+namespace MyPong.UI.Popups
 {
     [UnityEngine.Scripting.Preserve]
     public class PopupService

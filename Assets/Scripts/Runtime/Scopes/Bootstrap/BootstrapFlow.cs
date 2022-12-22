@@ -11,7 +11,7 @@ namespace MyPong
             QualitySettings.vSyncCount = 0;
             Application.targetFrameRate = 30;
             
-            SceneManager.LoadScene(Constants.Scenes.Core);
+            SceneManager.LoadScene(Constants.Scenes.Game);
         }
     }
 }

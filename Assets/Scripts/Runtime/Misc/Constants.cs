@@ -6,7 +6,7 @@ namespace MyPong
     {
         public static class Scenes
         {
-            public static readonly int Core = SceneUtility.GetBuildIndexByScenePath("game");
+            public static readonly int Game = SceneUtility.GetBuildIndexByScenePath("game");
         }
     }
 }

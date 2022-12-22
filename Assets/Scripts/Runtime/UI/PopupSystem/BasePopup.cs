@@ -7,7 +7,7 @@ using UnityEngine.UI;
 using VContainer;
 using VContainer.Unity;
 
-namespace MyPong.Popups.Base
+namespace MyPong.UI.Popups.Base
 {
     public interface IPopupData { }
     

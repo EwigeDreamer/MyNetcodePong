@@ -1,12 +1,12 @@
 using Cysharp.Threading.Tasks;
-using MyPong.Popups.Base;
+using MyPong.UI.Popups.Base;
 using TMPro;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
 using Utilities.Network;
 
-namespace MyPong.Popups
+namespace MyPong.UI.Popups
 {
     [UnityEngine.Scripting.Preserve]
     public class ClientSettingsPopupController : BasePopupController

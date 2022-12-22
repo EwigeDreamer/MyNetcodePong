@@ -1,4 +1,5 @@
-using MyPong.Popups;
+using MyPong.UI.Popups;
+using MyPong.UI.Popups.Misc;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;

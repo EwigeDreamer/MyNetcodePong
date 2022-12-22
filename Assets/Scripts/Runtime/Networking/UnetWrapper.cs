@@ -1,8 +1,11 @@
 using System;
+using DG.Tweening;
+using MyPong.UI;
 using UniRx;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
+using Utilities.DOTween;
 using Utilities.Network;
 
 namespace MyPong
@@ -10,10 +13,11 @@ namespace MyPong
     public class UnetWrapper
     {
         public readonly NetworkManager NetworkManager;
+        public readonly ScreenLocker ScreenLocker;
 
-        private Subject<Unit> _onConnect = new();
+        private Subject<Unit> _onConnected = new();
         private Subject<Unit> _onDisconnect = new();
-        public IObservable<Unit> OnConnect => _onConnect;
+        public IObservable<Unit> OnConnected => _onConnected;
         public IObservable<Unit> OnDisconnect => _onDisconnect;
 
         public UnityTransport Transport => NetworkManager.NetworkConfig.NetworkTransport as UnityTransport;
@@ -22,16 +26,55 @@ namespace MyPong
         public bool IsRunning => IsServer || IsClient;
         public bool ItsMe(ulong id) => id == NetworkManager.LocalClientId;
 
-        public UnetWrapper(NetworkManager networkManager)
+        private Tween _connectWaiter = null;
+
+        public UnetWrapper(
+            NetworkManager networkManager,
+            ScreenLocker screenLocker)
         {
             NetworkManager = networkManager;
+            ScreenLocker = screenLocker;
+
             NetworkManager.OnServerStarted += () => Debug.LogError(nameof(NetworkManager.OnServerStarted));
             NetworkManager.OnTransportFailure += () => Debug.LogError(nameof(NetworkManager.OnTransportFailure));
             NetworkManager.OnClientConnectedCallback += id => Debug.LogError($"{nameof(NetworkManager.OnClientConnectedCallback)}: {id} {id == NetworkManager.LocalClientId}");
             NetworkManager.OnClientDisconnectCallback += id => Debug.LogError($"{nameof(NetworkManager.OnClientDisconnectCallback)}: {id} {id == NetworkManager.LocalClientId}");
 
-            NetworkManager.OnClientConnectedCallback += _ => _onConnect.OnNext(default);
-            NetworkManager.OnClientDisconnectCallback += id => { if (!IsServer || ItsMe(id)) _onDisconnect.OnNext(default); };
+            NetworkManager.OnClientConnectedCallback += OnClientConnected;
+            NetworkManager.OnClientDisconnectCallback += OnClientDisconnect;
+        }
+
+        private void StartConnectWaiter()
+        {
+            StopConnectWaiter();
+            var connectTimeout = Transport.ConnectTimeoutMS * Transport.MaxConnectAttempts / 1000f;
+            _connectWaiter = DOTween.Sequence()
+                .AppendCallback(() => ScreenLocker.Show(ScreenLockTypes.Unet))
+                .Append(DOTweenUtility.Delay(connectTimeout + 1f))
+                .AppendCallback(() => ScreenLocker.Hide(ScreenLockTypes.Unet))
+                .Play();
+        }
+
+        private void StopConnectWaiter()
+        {
+            if (_connectWaiter != null)
+                _connectWaiter.Kill(true);
+            _connectWaiter = null;
+        }
+
+        private void OnClientConnected(ulong id)
+        {
+            StopConnectWaiter();
+            _onConnected.OnNext(default);
+        }
+
+        private void OnClientDisconnect(ulong id)
+        {
+            if (!IsServer || ItsMe(id))
+            {
+                // NetworkManager.Shutdown();
+                _onDisconnect.OnNext(default);
+            }
         }
         
         public bool StartClient(string ip, string portStr)
@@ -42,6 +85,8 @@ namespace MyPong
             var port = ushort.Parse(portStr);
 
             Transport.SetConnectionData(ip, port);
+            StartConnectWaiter();
+
             return NetworkManager.StartClient();
         }
 

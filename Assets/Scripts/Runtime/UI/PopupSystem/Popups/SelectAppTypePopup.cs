@@ -1,12 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using MyPong.Popups.Base;
+using MyPong.UI.Popups.Base;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace MyPong.Popups
+namespace MyPong.UI.Popups
 {
     [UnityEngine.Scripting.Preserve]
     public class SelectAppTypePopupController : BasePopupController

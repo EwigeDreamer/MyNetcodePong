@@ -1,10 +1,10 @@
-using MyPong.Popups.Base;
+using MyPong.UI.Popups.Base;
 using TMPro;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace MyPong.Popups
+namespace MyPong.UI.Popups
 {
     [UnityEngine.Scripting.Preserve]
     public class MessagePopupController : BasePopupController
