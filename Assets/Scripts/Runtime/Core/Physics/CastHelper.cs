@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using UnityEngine;
 using Utilities.Geometry;
 
-namespace MyPong.Core
+namespace MyPong.Core.Physics
 {
     public static class CastHelper
     {
