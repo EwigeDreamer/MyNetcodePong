@@ -15,7 +15,7 @@ namespace MyPong.Core
         public void Update()
         {
             
-            Bounds b = default;
+            // Bounds b = default;
             // b.ClosestPoint()
         }
 
