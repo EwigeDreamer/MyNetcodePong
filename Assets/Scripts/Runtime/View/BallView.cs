@@ -20,7 +20,7 @@ namespace MyPong.View
         public void UpdateView()
         {
             transform.localPosition = _ball.position;
-            _circle.localScale = Vector3.one * _ball.radius;
+            _circle.localScale = Vector3.one * _ball.radius * 2f;
         }
     }
 }
