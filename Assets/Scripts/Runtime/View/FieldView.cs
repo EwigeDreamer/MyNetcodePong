@@ -1,12 +1,15 @@
 using System;
 using Extensions.Vectors;
 using MyPong.Core.Objects;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace MyPong.View
 {
-    public class FieldView : MonoBehaviour, IUpdatableView
+    public class FieldView : NetworkBehaviour, IUpdatableView
     {
+        [SerializeField] private Transform _square;
+        
         private Field _field;
 
         public FieldView Init(Field field)
@@ -15,12 +18,10 @@ namespace MyPong.View
             return this;
         }
         
-        [SerializeField] private SpriteRenderer _box;
-        
         public void UpdateView()
         {
             transform.localPosition = Vector3.zero;
-            transform.localScale = _field.Scale.ToV3_xy0().SetZ(1f);
+            _square.localScale = _field.Scale.ToV3_xy0().SetZ(1f);
         }
     }
 }

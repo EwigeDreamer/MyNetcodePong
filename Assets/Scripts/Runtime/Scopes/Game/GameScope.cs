@@ -1,3 +1,4 @@
+using MyPong.Core;
 using MyPong.UI.Popups;
 using MyPong.UI.Popups.Misc;
 using UnityEngine;
@@ -14,6 +15,7 @@ namespace MyPong
         {
             builder.RegisterComponentInNewPrefab(_popupCanvasPrefab, Lifetime.Singleton);
             builder.Register<PopupService>(Lifetime.Singleton).WithParameter(this);
+            builder.Register<PongCoreController>(Lifetime.Singleton);
 
             builder.RegisterEntryPoint<GameFlow>();
         }

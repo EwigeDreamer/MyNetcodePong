@@ -1,11 +1,16 @@
 using System;
 using MyPong.Core.Objects;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace MyPong.View
 {
-    public class PaddleView : MonoBehaviour, IUpdatableView
+    public class PaddleView : NetworkBehaviour, IUpdatableView
     {
+        [SerializeField] private Transform _circle1; 
+        [SerializeField] private Transform _circle2; 
+        [SerializeField] private Transform _square; 
+        
         private Paddle _paddle;
 
         public PaddleView Init(Paddle paddle)
@@ -14,9 +19,6 @@ namespace MyPong.View
             return this;
         }
         
-        [SerializeField] private Transform _circle1; 
-        [SerializeField] private Transform _circle2; 
-        [SerializeField] private Transform _square; 
         public void UpdateView()
         {
             transform.localPosition = _paddle.position;

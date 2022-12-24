@@ -1,4 +1,5 @@
 using System;
+using MyPong.Core;
 using MyPong.UI;
 using MyPong.UI.Popups;
 using VContainer.Unity;
@@ -11,17 +12,20 @@ namespace MyPong
         private readonly PopupService PopupService;
         private readonly LoadingScreen LoadingScreen;
         private readonly UnetWrapper UnetWrapper;
+        private readonly PongCoreController PongCoreController;
 
         private CompositeDisposable _disposables = new();
 
         public GameFlow(
             PopupService popupService,
             LoadingScreen loadingScreen,
-            UnetWrapper unetWrapper)
+            UnetWrapper unetWrapper,
+            PongCoreController pongCoreController)
         {
             PopupService = popupService;
             LoadingScreen = loadingScreen;
             UnetWrapper = unetWrapper;
+            PongCoreController = pongCoreController;
         }
 
         public void Start()
@@ -42,6 +46,11 @@ namespace MyPong
             await PopupService.CloseAll<HostSettingsPopup>();
             await PopupService.CloseAll<ClientSettingsPopup>();
             await PopupService.OpenPopup<GameHudPopup>();
+            
+            if (UnetWrapper.IsServer)
+            {
+                PongCoreController.StartCoreGameplay();
+            }
         }
 
         private async void OnDisconnect()

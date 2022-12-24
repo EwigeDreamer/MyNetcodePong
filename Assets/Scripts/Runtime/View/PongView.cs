@@ -30,16 +30,21 @@ namespace MyPong.View
                 = await UniTask.WhenAll(fieldTask, paddleTask, ballTask);
             
             var fieldView = UnityEngine.Object.Instantiate(fieldPrefab).Init(PongCore.Field);
+            fieldView.NetworkObject.Spawn();
             Updatables.Add(fieldView);
 
             foreach (var paddle in PongCore.Paddles)
             {
                 var paddleView = UnityEngine.Object.Instantiate(paddlePrefab, fieldView.transform).Init(paddle);
+                paddleView.NetworkObject.Spawn();
                 Updatables.Add(paddleView);
             }
             
             var ballView = UnityEngine.Object.Instantiate(ballPrefab).Init(PongCore.Ball);
+            ballView.NetworkObject.Spawn();
             Updatables.Add(ballView);
+
+            UpdateView();
         }
 
         public void UpdateView()

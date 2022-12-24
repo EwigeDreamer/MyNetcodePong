@@ -1,11 +1,14 @@
 using System;
 using MyPong.Core.Objects;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace MyPong.View
 {
-    public class BallView : MonoBehaviour, IUpdatableView
+    public class BallView : NetworkBehaviour, IUpdatableView
     {
+        [SerializeField] private Transform _circle;
+        
         private Ball _ball;
 
         public BallView Init(Ball ball)
@@ -17,7 +20,7 @@ namespace MyPong.View
         public void UpdateView()
         {
             transform.localPosition = _ball.position;
-            transform.localScale = Vector3.one * _ball.radius;
+            _circle.localScale = Vector3.one * _ball.radius;
         }
     }
 }
