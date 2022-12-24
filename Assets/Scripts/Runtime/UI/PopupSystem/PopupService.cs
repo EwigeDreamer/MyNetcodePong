@@ -38,7 +38,7 @@ namespace MyPong.UI.Popups
             }
             
             _inProcess = true;
-            var prefab = await AssertService.LoadGameObjectFromAddressablesAsync<T>(ResourceType.Popup);
+            var prefab = await AssetService.LoadGameObjectFromAddressablesAsync<T>(ResourceType.Popup);
             var prevPopup = _popups.TryPeek(out var x) ? x.Popup : null;
             var nextPopup = Object.Instantiate(prefab, _popupCanvas.PopupContainer);
             var scope = TryInject(nextPopup);

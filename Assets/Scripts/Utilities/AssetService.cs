@@ -9,11 +9,13 @@ namespace Utilities
     public enum ResourceType
     {
         Popup,
+        View,
     }
 
-    public static class AssertService
+    public static class AssetService
     {
         private const string POPUP_PREFABS_PATH = "UI/Popups";
+        private const string VIEW_PREFABS_PATH = "Views";
 
         public static async UniTask<T> LoadGameObjectFromAddressablesAsync<T>(ResourceType type, string name = "")
             where T : Object
@@ -37,6 +39,9 @@ namespace Utilities
             switch (type) {
                 case ResourceType.Popup:
                     prefix = POPUP_PREFABS_PATH;
+                    break;
+                case ResourceType.View:
+                    prefix = VIEW_PREFABS_PATH;
                     break;
                 default: throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
