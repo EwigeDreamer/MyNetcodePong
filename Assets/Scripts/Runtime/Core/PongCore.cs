@@ -121,6 +121,7 @@ namespace MyPong.Core
                 step -= leftTmp;
                 left += leftTmp;
                 step = Vector2.Reflect(step, normal);
+                ball.direction = Vector2.Reflect(ball.direction, normal).normalized;
                 return true;
             }
             return false;
