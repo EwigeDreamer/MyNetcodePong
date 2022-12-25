@@ -1,4 +1,5 @@
 using MyPong.Core;
+using MyPong.Input;
 using MyPong.UI.Popups;
 using MyPong.UI.Popups.Misc;
 using UnityEngine;
@@ -18,6 +19,7 @@ namespace MyPong
             builder.RegisterComponent(_cameraController).AsSelf();
             builder.Register<PopupService>(Lifetime.Singleton).WithParameter(this);
             builder.Register<PongCoreController>(Lifetime.Singleton);
+            builder.Register<InputController>(Lifetime.Singleton);
 
             builder.RegisterEntryPoint<GameFlow>();
         }
