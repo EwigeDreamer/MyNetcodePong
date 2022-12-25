@@ -38,14 +38,16 @@ namespace MyPong.View
 
             foreach (var paddle in PongCore.Paddles)
             {
-                var paddleView = UnityEngine.Object.Instantiate(paddlePrefab, fieldView.transform).Init(paddle);
+                var paddleView = UnityEngine.Object.Instantiate(paddlePrefab).Init(paddle);
                 paddleView.NetworkObject.Spawn();
+                paddleView.transform.SetParent(fieldView.transform);
                 Updatables.Add(paddleView);
                 paddleView.OnDestroyAsObservable().Subscribe(_ => Updatables.Remove(paddleView));
             }
             
             var ballView = UnityEngine.Object.Instantiate(ballPrefab).Init(PongCore.Ball);
             ballView.NetworkObject.Spawn();
+            ballView.transform.SetParent(fieldView.transform);
             Updatables.Add(ballView);
             ballView.OnDestroyAsObservable().Subscribe(_ => Updatables.Remove(ballView));
 
