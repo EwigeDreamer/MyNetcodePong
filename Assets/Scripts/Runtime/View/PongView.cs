@@ -14,7 +14,7 @@ namespace MyPong.View
         private readonly PongCore PongCore;
         private readonly Vector2 Scale;
         private readonly List<IUpdatableView> Updatables = new();
-        private GameObject _container;
+        private readonly List<GameObject> ToDestroy = new();
         
         public PongView(PongCore core)
         {
@@ -35,7 +35,8 @@ namespace MyPong.View
             fieldView.NetworkObject.Spawn();
             Updatables.Add(fieldView);
             fieldView.OnDestroyAsObservable().Subscribe(_ => Updatables.Remove(fieldView));
-
+            ToDestroy.Add(fieldView.gameObject);
+            
             foreach (var paddle in PongCore.Paddles)
             {
                 var paddleView = UnityEngine.Object.Instantiate(paddlePrefab).Init(paddle);
@@ -43,6 +44,7 @@ namespace MyPong.View
                 paddleView.transform.SetParent(fieldView.transform);
                 Updatables.Add(paddleView);
                 paddleView.OnDestroyAsObservable().Subscribe(_ => Updatables.Remove(paddleView));
+                ToDestroy.Add(paddleView.gameObject);
             }
             
             var ballView = UnityEngine.Object.Instantiate(ballPrefab).Init(PongCore.Ball);
@@ -50,6 +52,7 @@ namespace MyPong.View
             ballView.transform.SetParent(fieldView.transform);
             Updatables.Add(ballView);
             ballView.OnDestroyAsObservable().Subscribe(_ => Updatables.Remove(ballView));
+            ToDestroy.Add(ballView.gameObject);
 
             UpdateView();
         }
@@ -62,8 +65,9 @@ namespace MyPong.View
 
         public void Dispose()
         {
-            if (_container != null)
-                UnityEngine.Object.Destroy(_container);
+            foreach(var obj in ToDestroy)
+                UnityEngine.Object.Destroy(obj);
+            ToDestroy.Clear();
             Updatables.Clear();
         }
     }
