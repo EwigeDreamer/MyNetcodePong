@@ -15,12 +15,13 @@ namespace MyPong.UI.Popups
     public class PopupService
     {
         private readonly LifetimeScope ParentScope;
-        private readonly PopupCanvas _popupCanvas;
+        private readonly PopupCanvas PopupCanvas;
 
+        [UnityEngine.Scripting.Preserve]
         public PopupService(LifetimeScope parentScope, PopupCanvas popupCanvas)
         {
             ParentScope = parentScope;
-            _popupCanvas = popupCanvas;
+            PopupCanvas = popupCanvas;
         }
 
 
@@ -42,7 +43,7 @@ namespace MyPong.UI.Popups
             _inProcess = true;
             var prefab = await AssetService.LoadGameObjectFromAddressablesAsync<T>(ResourceType.Popup);
             var prevPopup = _popups.TryPeek(out var x) ? x.Popup : null;
-            var nextPopup = Object.Instantiate(prefab, _popupCanvas.PopupContainer);
+            var nextPopup = Object.Instantiate(prefab, PopupCanvas.PopupContainer);
             var scope = TryInject(nextPopup);
             _popups.Push(new PopupScopeWrapper(nextPopup, scope));
             nextPopup.Init(data);

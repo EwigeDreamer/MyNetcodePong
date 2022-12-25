@@ -1,6 +1,8 @@
 using System;
+using Extensions.Strings;
 using Extensions.Vectors;
 using MyPong;
+using MyPong.Core;
 using MyPong.Networking;
 using UniRx;
 using UnityEngine;
@@ -9,20 +11,28 @@ using NetworkPlayer = MyPong.Networking.NetworkPlayer;
 
 namespace MyPong.Input
 {
+    [UnityEngine.Scripting.Preserve]
     public class InputController : IDisposable
     {
-        public readonly CameraController CameraController;
-        public readonly UnetWrapper UnetWrapper;
+        private readonly CameraController CameraController;
+        private readonly UnetWrapper UnetWrapper;
+        private readonly PongCoreController PongCoreController;
 
         private CompositeDisposable _disposable = new();
 
+        [UnityEngine.Scripting.Preserve]
         public InputController(
             CameraController cameraController,
-            UnetWrapper unetWrapper)
+            UnetWrapper unetWrapper,
+            PongCoreController pongCoreController)
         {
             CameraController = cameraController;
             UnetWrapper = unetWrapper;
+            PongCoreController = pongCoreController;
+        }
 
+        public void Start()
+        {
             UnetWrapper.SpawnEventService.OnSpawnNetworkObject
                 .Select(a=>a.GetComponent<NetworkPlayer>())
                 .Where(a=>a!= null)
@@ -41,12 +51,14 @@ namespace MyPong.Input
         private IDisposable _updateSubscription = null;
         private void StartUpdating(NetworkPlayer player)
         {
+            // Debug.LogError("START UPDATING".Bold().Color(Color.cyan));
             StopUpdating();
             _player = player;
             _updateSubscription = Observable.EveryUpdate().Subscribe(Update);
         }
         private void StopUpdating()
         {
+            // Debug.LogError("STOP UPDATING".Bold().Color(Color.yellow));
             _player = null;
             _updateSubscription?.Dispose();
         }

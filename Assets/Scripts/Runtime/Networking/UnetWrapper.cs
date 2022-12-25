@@ -13,6 +13,7 @@ using Utilities.Network;
 
 namespace MyPong.Networking
 {
+    [UnityEngine.Scripting.Preserve]
     public class UnetWrapper
     {
         public readonly NetworkManager NetworkManager;
@@ -40,6 +41,7 @@ namespace MyPong.Networking
 
         private readonly List<ulong> _connectedClients = new();
 
+        [UnityEngine.Scripting.Preserve]
         public UnetWrapper(
             NetworkManager networkManager,
             SpawnEventService spawnEventService,

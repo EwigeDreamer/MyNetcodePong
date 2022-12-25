@@ -1,6 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using MyPong.Core;
+using MyPong.Input;
 using MyPong.Networking;
 using MyPong.UI;
 using MyPong.UI.Popups;
@@ -19,6 +20,7 @@ namespace MyPong
         private readonly UnetWrapper UnetWrapper;
         private readonly CameraController CameraController;
         private readonly PongCoreController PongCoreController;
+        private readonly InputController InputController;
 
         private CompositeDisposable _disposables = new();
 
@@ -27,13 +29,15 @@ namespace MyPong
             LoadingScreen loadingScreen,
             UnetWrapper unetWrapper,
             CameraController cameraController,
-            PongCoreController pongCoreController)
+            PongCoreController pongCoreController,
+            InputController inputController)
         {
             PopupService = popupService;
             LoadingScreen = loadingScreen;
             UnetWrapper = unetWrapper;
             CameraController = cameraController;
             PongCoreController = pongCoreController;
+            InputController = inputController;
         }
 
         public void Start()
@@ -64,6 +68,7 @@ namespace MyPong
 
         private async void StartGame()
         {
+            InputController.Start();
             await PopupService.OpenPopup<SelectAppTypePopup>();
             LoadingScreen.Hide();
         }

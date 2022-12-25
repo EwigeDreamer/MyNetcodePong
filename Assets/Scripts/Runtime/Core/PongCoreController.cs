@@ -12,7 +12,9 @@ namespace MyPong.Core
         private PongCore _core;
         private PongView _view;
 
-        private CompositeDisposable _disposable;
+        private IDisposable _updateSubscription;
+
+        public bool IsRunning => _core != null;
         
         public void StartCoreGameplay()
         {
@@ -28,14 +30,13 @@ namespace MyPong.Core
             _view = new(_core);
             _view.Init().Forget();
 
-            _disposable?.Dispose();
-            _disposable = new();
-            Observable.EveryUpdate().Subscribe(Update).AddTo(_disposable);
+            _updateSubscription?.Dispose();
+            _updateSubscription = Observable.EveryUpdate().Subscribe(Update);
         }
 
         public void StopCoreGameplay()
         {
-            _disposable?.Dispose();
+            _updateSubscription?.Dispose();
             _view?.Dispose();
             _view = null;
             _core = null;
