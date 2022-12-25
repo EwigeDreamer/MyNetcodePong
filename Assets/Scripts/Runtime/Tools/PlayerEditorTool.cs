@@ -1,5 +1,6 @@
 using Sirenix.OdinInspector;
 using UnityEngine;
+using NetworkPlayer = MyPong.Networking.NetworkPlayer;
 
 namespace MyPong.Tools
 {

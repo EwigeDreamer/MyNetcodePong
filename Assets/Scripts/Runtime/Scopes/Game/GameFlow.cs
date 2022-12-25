@@ -1,10 +1,14 @@
 using System;
 using Cysharp.Threading.Tasks;
 using MyPong.Core;
+using MyPong.Networking;
 using MyPong.UI;
 using MyPong.UI.Popups;
+using MyPong.View;
 using VContainer.Unity;
 using UniRx;
+using Unity.Netcode;
+using UnityEngine;
 
 namespace MyPong
 {
@@ -13,6 +17,7 @@ namespace MyPong
         private readonly PopupService PopupService;
         private readonly LoadingScreen LoadingScreen;
         private readonly UnetWrapper UnetWrapper;
+        private readonly CameraController CameraController;
         private readonly PongCoreController PongCoreController;
 
         private CompositeDisposable _disposables = new();
@@ -21,11 +26,13 @@ namespace MyPong
             PopupService popupService,
             LoadingScreen loadingScreen,
             UnetWrapper unetWrapper,
+            CameraController cameraController,
             PongCoreController pongCoreController)
         {
             PopupService = popupService;
             LoadingScreen = loadingScreen;
             UnetWrapper = unetWrapper;
+            CameraController = cameraController;
             PongCoreController = pongCoreController;
         }
 
@@ -37,8 +44,22 @@ namespace MyPong
             UnetWrapper.OnStartClient.Subscribe(OnStartClient).AddTo(_disposables);
             UnetWrapper.OnShutdown.Subscribe(OnShutdown).AddTo(_disposables);
             UnetWrapper.OnPlayersEnough.Subscribe(OnPlayersEnough).AddTo(_disposables);
+
+            UnetWrapper.SpawnEventService.OnSpawnNetworkObject
+                .Select(a => a.GetComponent<FieldView>())
+                .Where(a => a != null)
+                .Subscribe(fv => fv.OnChangeScale
+                    .Subscribe(a => OnFieldViewChange(a.field, a.scale))
+                    .AddTo(fv))
+                .AddTo(_disposables);
             
             StartGame();
+        }
+
+        private void OnFieldViewChange(FieldView field, Vector2 scale)
+        {
+            field.transform.localRotation = Quaternion.Euler(0f, 0f, UnetWrapper.IsServer ? 0f : 180f);
+            CameraController.FocusOnField(scale);
         }
 
         private async void StartGame()

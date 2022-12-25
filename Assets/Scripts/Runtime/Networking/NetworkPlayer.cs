@@ -2,7 +2,7 @@ using Extensions.Strings;
 using Unity.Netcode;
 using UnityEngine;
 
-namespace MyPong
+namespace MyPong.Networking
 {
     public class NetworkPlayer : NetworkBehaviour
     {

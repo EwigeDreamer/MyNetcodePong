@@ -11,11 +11,12 @@ using UnityEngine;
 using Utilities.DOTween;
 using Utilities.Network;
 
-namespace MyPong
+namespace MyPong.Networking
 {
     public class UnetWrapper
     {
         public readonly NetworkManager NetworkManager;
+        public readonly SpawnEventService SpawnEventService;
         public readonly ScreenLocker ScreenLocker;
 
         private Subject<ulong> _onConnectedToServer = new();
@@ -41,9 +42,11 @@ namespace MyPong
 
         public UnetWrapper(
             NetworkManager networkManager,
+            SpawnEventService spawnEventService,
             ScreenLocker screenLocker)
         {
             NetworkManager = networkManager;
+            SpawnEventService = spawnEventService;
             ScreenLocker = screenLocker;
 
             NetworkManager.OnServerStarted += () => Debug.Log(nameof(NetworkManager.OnServerStarted).Bold());
@@ -54,7 +57,6 @@ namespace MyPong
             NetworkManager.OnClientConnectedCallback += OnClientConnected;
             NetworkManager.OnClientDisconnectCallback += OnClientDisconnect;
         }
-
 
         private Tween _connectWaiter = null;
         private void StartConnectScreenLocker()

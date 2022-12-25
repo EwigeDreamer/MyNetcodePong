@@ -363,6 +363,7 @@ MonoBehaviour:
   autoRun: 1
   autoInjectGameObjects: []
   _networkManager: {fileID: 6352248441506964062}
+  _spawnEventService: {fileID: 1807974854745257455}
   _loadingScreen: {fileID: 430083282125462873}
   _screenLocker: {fileID: 85798004}
 --- !u!4 &1338126615
@@ -581,6 +582,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b879a7c054ce74422b309a101e740b6b, type: 3}
+--- !u!114 &1807974854745257455 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4340063422510940768, guid: b879a7c054ce74422b309a101e740b6b,
+    type: 3}
+  m_PrefabInstance: {fileID: 1807974854745257454}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c380c07434674c91bfd5c1d02c651a8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1991117425045404971
 PrefabInstance:
   m_ObjectHideFlags: 0

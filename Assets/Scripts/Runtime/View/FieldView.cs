@@ -1,6 +1,7 @@
 using System;
 using Extensions.Vectors;
 using MyPong.Core.Objects;
+using UniRx;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -8,9 +9,13 @@ namespace MyPong.View
 {
     public class FieldView : NetworkBehaviour, IUpdatableView
     {
+        private Subject<(FieldView field, Vector2 scale)> _onChangeScale = new();
+        public IObservable<(FieldView field, Vector2 scale)> OnChangeScale => _onChangeScale;
+
         [SerializeField] private Transform _square;
         
         private Field _field;
+        
         private Vector2 _fieldScale = Vector2.zero;
 
         public FieldView Init(Field field)
@@ -26,16 +31,14 @@ namespace MyPong.View
             if (_field.Scale != _fieldScale)
             {
                 _fieldScale = _field.Scale;
-                SetCameraFocusClientRpc(_field.Scale);
+                CallOnChangeScaleClientRpc(_field.Scale);
             }
         }
 
         [ClientRpc]
-        private void SetCameraFocusClientRpc(Vector2 fieldScale)
+        private void CallOnChangeScaleClientRpc(Vector2 fieldScale)
         {
-            var cameraController = FindObjectOfType<CameraController>();
-            if (cameraController != null)
-                cameraController.FocusOnField(fieldScale);
+            _onChangeScale.OnNext((this, fieldScale));
         }
     }
 }
