@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using Cysharp.Threading.Tasks;
+using MyPong.Networking;
 using MyPong.View;
 using UniRx;
 using UnityEngine;
@@ -9,13 +11,22 @@ namespace MyPong.Core
     [UnityEngine.Scripting.Preserve]
     public class PongCoreController : IDisposable
     {
+        private readonly UnetWrapper UnetWrapper;
+        
         private PongCore _core;
         private PongView _view;
 
-        private IDisposable _updateSubscription;
+        private CompositeDisposable _disposable;
 
         public bool IsRunning => _core != null;
+
+        [UnityEngine.Scripting.Preserve]
+        public PongCoreController(UnetWrapper unetWrapper)
+        {
+            UnetWrapper = unetWrapper;
+        }
         
+        //запускается только на HOST'е
         public void StartCoreGameplay()
         {
             if (_core != null) return;
@@ -30,13 +41,20 @@ namespace MyPong.Core
             _view = new(_core);
             _view.Init().Forget();
 
-            _updateSubscription?.Dispose();
-            _updateSubscription = Observable.EveryUpdate().Subscribe(Update);
+            _disposable?.Dispose();
+            _disposable = new();
+            Observable.EveryUpdate().Subscribe(Update).AddTo(_disposable);
+
+            var players = UnetWrapper.GetAllPlayers();
+            var player0 = players.First(a => UnetWrapper.ItsMe(a.OwnerClientId));
+            var player1 = players.First(a => !UnetWrapper.ItsMe(a.OwnerClientId));
+            player0.OnPositionControl.Subscribe(v => _core.Paddles[0].SetPosition(v)).AddTo(_disposable);
+            player1.OnPositionControl.Subscribe(v => _core.Paddles[1].SetPosition(-v)).AddTo(_disposable);
         }
 
         public void StopCoreGameplay()
         {
-            _updateSubscription?.Dispose();
+            _disposable?.Dispose();
             _view?.Dispose();
             _view = null;
             _core = null;

@@ -51,16 +51,16 @@ namespace MyPong.Input
         private IDisposable _updateSubscription = null;
         private void StartUpdating(NetworkPlayer player)
         {
-            // Debug.LogError("START UPDATING".Bold().Color(Color.cyan));
-            StopUpdating();
             _player = player;
+            _updateSubscription?.Dispose();
             _updateSubscription = Observable.EveryUpdate().Subscribe(Update);
+            Debug.Log("Start Input Updating!");
         }
         private void StopUpdating()
         {
-            // Debug.LogError("STOP UPDATING".Bold().Color(Color.yellow));
             _player = null;
             _updateSubscription?.Dispose();
+            Debug.Log("Stop Input Updating!");
         }
 
         private void Update(long _)
@@ -69,7 +69,7 @@ namespace MyPong.Input
             {
                 var sp = UnityEngine.Input.mousePosition;
                 var wp = CameraController.Camera.ScreenToWorldPoint(sp);
-                Debug.LogError($"POINTER! screen: {sp.ToV2_xy()}, world: {wp.ToV2_xy()}");
+                _player.ControlPositionServerRpc(wp.x);
             }
         }
         

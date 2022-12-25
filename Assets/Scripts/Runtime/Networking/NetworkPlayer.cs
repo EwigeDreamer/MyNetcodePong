@@ -1,4 +1,6 @@
+using System;
 using Extensions.Strings;
+using UniRx;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -6,9 +8,29 @@ namespace MyPong.Networking
 {
     public class NetworkPlayer : NetworkBehaviour
     {
-        [SerializeField] private NetworkVariable<Color> _networkColor = new();
+        private Subject<float> _onPositionControl = new();
+        public IObservable<float> OnPositionControl => _onPositionControl;
 
         public override void OnNetworkSpawn()
+        {
+            SpawnDebug();
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            DespawnDebug();
+        }
+
+
+        [ServerRpc]
+        public void ControlPositionServerRpc(float position)
+        {
+            _onPositionControl.OnNext(position);
+        }
+        
+        
+        
+        private void SpawnDebug()
         {
             var log = $"SPAWN!!!".Bold().Color(Color.cyan) + "\n";
             log += $"{nameof(IsOwner)}: {IsOwner}\n";
@@ -21,7 +43,7 @@ namespace MyPong.Networking
             Debug.Log(log, this);
         }
 
-        public override void OnNetworkDespawn()
+        private void DespawnDebug()
         {
             var log = $"DESPAWN!!!".Bold().Color(Color.yellow) + "\n";
             log += $"{nameof(IsOwner)}: {IsOwner}\n";
@@ -32,18 +54,6 @@ namespace MyPong.Networking
             log += $"{nameof(IsLocalPlayer)}: {IsLocalPlayer}\n";
             log += $"{nameof(IsOwnedByServer)}: {IsOwnedByServer}\n";
             Debug.Log(log, this);
-        }
-
-        [ServerRpc]
-        public void RequestServerRpc(ServerRpcParams rpcParams = default)
-        {
-            Debug.LogWarning("SERVER RPC!".Bold().Color(Color.magenta));
-        }
-
-        [ClientRpc]
-        public void RequestClientRpc(ClientRpcParams rpcParams = default)
-        {
-            Debug.LogWarning("CLIENT RPC!".Bold().Color(Color.green));
         }
     }
 }

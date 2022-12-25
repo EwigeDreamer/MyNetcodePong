@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using DG.Tweening;
 using Extensions.Strings;
 using MyPong.UI;
@@ -58,6 +59,13 @@ namespace MyPong.Networking
 
             NetworkManager.OnClientConnectedCallback += OnClientConnected;
             NetworkManager.OnClientDisconnectCallback += OnClientDisconnect;
+        }
+
+        public List<NetworkPlayer> GetAllPlayers()
+        {
+            return NetworkManager.ConnectedClientsList
+                .Select(a => a.PlayerObject.GetComponent<NetworkPlayer>())
+                .ToList();
         }
 
         private Tween _connectWaiter = null;
