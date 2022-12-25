@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Extensions.Strings;
 using MyPong.UI.Popups.Base;
 using MyPong.UI.Popups.Misc;
 using UnityEngine;
@@ -29,11 +30,12 @@ namespace MyPong.UI.Popups
 
         public async UniTask OpenPopup<T>(IPopupData data = null) where T : BasePopup
         {
+            Debug.Log($"Try to open popup {typeof(T).Name.Bold()}");
             await UniTask.WaitWhile(() => _inProcess);
 
             if (!CanOpenNew<T>())
             {
-                Debug.LogError($"Can't open another {typeof(T).Name}, because it can be only one!");
+                Debug.LogWarning($"Can't open another {typeof(T).Name}, because it can be only one!");
                 return;
             }
             
@@ -49,13 +51,20 @@ namespace MyPong.UI.Popups
             var showingTask = nextPopup.Show();
 
             await UniTask.WhenAll(hidingTask, showingTask);
+            Debug.Log($"Popup {typeof(T).Name.Bold()} has been opened");
             _inProcess = false;
         }
 
         public async UniTask ClosePopup(BasePopup basePopup)
         {
             if (basePopup == null) return;
-            if (basePopup.IsUnclosable) return;
+            var type = basePopup.GetType();
+            Debug.Log($"Try to close popup {type.Name.Bold()}");
+            if (basePopup.IsUnclosable)
+            {
+                Debug.LogWarning($"Can't close {type.Name}, because it is unclosable!");
+                return;
+            }
             await UniTask.WaitUntil(() => _inProcess == false);
             
             _inProcess = true;
@@ -69,6 +78,7 @@ namespace MyPong.UI.Popups
 
             await UniTask.WhenAll(hidingTask, showingTask);
             facade?.Dispose();
+            Debug.Log($"Popup {type.Name.Bold()} has been closed");
             _inProcess = false;
         }
 

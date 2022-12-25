@@ -17,7 +17,6 @@ namespace MyPong
     {
         public readonly NetworkManager NetworkManager;
         public readonly ScreenLocker ScreenLocker;
-        public readonly PopupService PopupService;
 
         private Subject<ulong> _onConnectedToServer = new();
         private Subject<ulong> _onDisconnectFromServer = new();
@@ -42,12 +41,10 @@ namespace MyPong
 
         public UnetWrapper(
             NetworkManager networkManager,
-            ScreenLocker screenLocker,
-            PopupService popupService)
+            ScreenLocker screenLocker)
         {
             NetworkManager = networkManager;
             ScreenLocker = screenLocker;
-            PopupService = popupService;
 
             NetworkManager.OnServerStarted += () => Debug.LogError(nameof(NetworkManager.OnServerStarted));
             NetworkManager.OnTransportFailure += () => Debug.LogError(nameof(NetworkManager.OnTransportFailure));
@@ -82,6 +79,7 @@ namespace MyPong
             if (IsServer)
             {
                 _connectedClients.Add(id);
+                Debug.LogError($"GOVNOOOOOOOOOOOOOOOOOOO {id} {_connectedClients.Count}".Bold().Color(Color.green));
                 CheckClientsCount();
             }
             StopConnectScreenLocker();
@@ -93,6 +91,7 @@ namespace MyPong
             if (IsServer)
             {
                 _connectedClients.Remove(id);
+                Debug.LogError($"GOVNOOOOOOOOOOOOOOOOOOO {id} {_connectedClients.Count}".Bold().Color(Color.red));
                 CheckClientsCount();
             }
             if (!IsServer || ItsMe(id))
@@ -114,7 +113,7 @@ namespace MyPong
             
             var result = NetworkManager.StartClient();
             if (result)
-                _onStartHost.OnNext(default);
+                _onStartClient.OnNext(default);
             return result;
         }
 
@@ -159,6 +158,7 @@ namespace MyPong
         public void Shutdown()
         {
             NetworkManager.Shutdown();
+            _connectedClients.Clear();
             _onShutdown.OnNext(default);
         }
 

@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using MyPong.Core;
+using UniRx.Triggers;
+using UniRx;
 using UnityEngine;
 using Utilities;
 
@@ -32,17 +34,20 @@ namespace MyPong.View
             var fieldView = UnityEngine.Object.Instantiate(fieldPrefab).Init(PongCore.Field);
             fieldView.NetworkObject.Spawn();
             Updatables.Add(fieldView);
+            fieldView.OnDestroyAsObservable().Subscribe(_ => Updatables.Remove(fieldView));
 
             foreach (var paddle in PongCore.Paddles)
             {
                 var paddleView = UnityEngine.Object.Instantiate(paddlePrefab, fieldView.transform).Init(paddle);
                 paddleView.NetworkObject.Spawn();
                 Updatables.Add(paddleView);
+                paddleView.OnDestroyAsObservable().Subscribe(_ => Updatables.Remove(paddleView));
             }
             
             var ballView = UnityEngine.Object.Instantiate(ballPrefab).Init(PongCore.Ball);
             ballView.NetworkObject.Spawn();
             Updatables.Add(ballView);
+            ballView.OnDestroyAsObservable().Subscribe(_ => Updatables.Remove(ballView));
 
             UpdateView();
         }

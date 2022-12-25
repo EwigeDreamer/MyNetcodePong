@@ -33,19 +33,19 @@ namespace MyPong.Core
             Observable.EveryUpdate().Subscribe(Update).AddTo(_disposable);
         }
 
-        private void Update(long _)
-        {
-            var dt = Time.deltaTime;
-            _core.Update(dt);
-            _view.UpdateView();
-        }
-
         public void StopCoreGameplay()
         {
             _disposable?.Dispose();
             _view?.Dispose();
             _view = null;
             _core = null;
+        }
+
+        private void Update(long _)
+        {
+            var dt = Time.deltaTime;
+            _core.Update(dt);
+            _view.UpdateView();
         }
 
         public void Dispose()

@@ -58,7 +58,8 @@ namespace MyPong
 
         private async void OnDisconnectFromServer(ulong id)
         {
-            await UniTask.WhenAll(PopupService.CloseAll<GameHudPopup>());
+            await UniTask.WhenAll(
+                PopupService.CloseAll<GameHudPopup>());
         }
 
         private async void OnPlayersEnough(bool value)
@@ -85,10 +86,9 @@ namespace MyPong
                 PopupService.OpenPopup<WaitClientsPopup>());
         }
 
-        private async void OnStartClient(Unit _)
+        private void OnStartClient(Unit _)
         {
-            await UniTask.WhenAll(
-                PopupService.OpenPopup<GameHudPopup>());
+            
         }
 
         private async void OnShutdown(Unit _)
