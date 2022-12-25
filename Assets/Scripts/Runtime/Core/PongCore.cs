@@ -74,7 +74,7 @@ namespace MyPong.Core
             {
                 var start = ball.position + left;
                 var cast = new Capsule(ball.position, start + step, ball.radius);
-                if (CastHelper.CircleCast(goal.Collider, cast, out var point, out var normal))
+                if (CastHelper.CircleCast(goal.Collider, cast, out var point, out var normal, out _))
                 {
                     OnGoal?.Invoke(goal.Id);
                     ResetBall();
