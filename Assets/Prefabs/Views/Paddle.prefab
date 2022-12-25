@@ -349,6 +349,7 @@ GameObject:
   - component: {fileID: 858988730683201719}
   - component: {fileID: 3834474918118066344}
   - component: {fileID: 2778023869226700676}
+  - component: {fileID: 4861244867352648308}
   m_Layer: 0
   m_Name: Paddle
   m_TagString: Untagged
@@ -442,3 +443,15 @@ SortingGroup:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 1
+--- !u!114 &4861244867352648308
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4439883252994389910}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f2fb5ab7b704ebeae42428a0d1a80f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
