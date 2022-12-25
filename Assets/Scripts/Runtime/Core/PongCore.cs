@@ -104,6 +104,7 @@ namespace MyPong.Core
                 if (CheckCast(ball, paddle, ref step, ref left, out var point))
                 {
                     OnBallBounce?.Invoke(ball, point);
+                    ball.speed += 0.1f;
                     // ignoreCast.Add(paddle);
                     CastBallRecursively(ball, /*ignoreCast,*/ ref step, ref left);
                     return;

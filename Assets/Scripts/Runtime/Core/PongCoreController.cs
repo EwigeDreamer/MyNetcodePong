@@ -37,7 +37,7 @@ namespace MyPong.Core
                 1f,
                 3f,
                 1f,
-                2f);
+                5f);
             _view = new(_core);
             _view.Init().Forget();
 
