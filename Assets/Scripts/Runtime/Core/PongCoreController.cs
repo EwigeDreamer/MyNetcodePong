@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Extensions.Vectors;
 using MyPong.Networking;
 using MyPong.View;
 using UniRx;
@@ -37,7 +38,8 @@ namespace MyPong.Core
                 1f,
                 3f,
                 1f,
-                5f);
+                5f,
+                1f);
             _view = new(_core);
             _view.Init().Forget();
 
@@ -63,6 +65,9 @@ namespace MyPong.Core
         private void Update(long _)
         {
             var dt = Time.deltaTime;
+#if UNITY_EDITOR
+            _core.Paddles[1].position = _core.Paddles[1].position.SetX(_core.Ball.position.x);
+#endif
             _core.Update(dt);
             _view.UpdateView();
         }

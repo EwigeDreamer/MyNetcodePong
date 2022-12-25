@@ -18,6 +18,7 @@ namespace MyPong.Core
         public event Action<Ball, Vector2> OnBallBounce;
 
         private readonly float StartBallSpeed; 
+        private readonly float BallSpeedIncrease; 
 
         public PongCore(
             Vector2 fieldScale,
@@ -25,7 +26,8 @@ namespace MyPong.Core
             float paddleThickness,
             float paddleMaxSpeed,
             float ballScale,
-            float ballSpeed)
+            float ballSpeed,
+            float ballSpeedIncrease)
         {
             Field = new Field(fieldScale);
             Paddles = new[]
@@ -35,6 +37,7 @@ namespace MyPong.Core
             };
             Ball = new Ball(Vector2.zero, ballScale / 2f);
             StartBallSpeed = ballSpeed;
+            BallSpeedIncrease = ballSpeedIncrease;
             ResetBall();
         }
 
@@ -51,6 +54,7 @@ namespace MyPong.Core
                 Random.Range(0, 2) > 0 ? -1f : 1f)
                 .normalized;
             Ball.speed = StartBallSpeed;
+            Ball.speedIncrease = BallSpeedIncrease;
         }
 
         private void MovePaddle(Paddle paddle, float deltaTime)
@@ -104,7 +108,14 @@ namespace MyPong.Core
                 if (CheckCast(ball, paddle, ref step, ref left, out var point))
                 {
                     OnBallBounce?.Invoke(ball, point);
-                    ball.speed += 0.1f;
+                    ball.SpeedUp();
+                    
+                    //трение
+                    var paddleSpeed = Vector2.right * paddle.currentSpeed;
+                    var ballSpeed = ball.direction * ball.speed;
+                    var resultSpeed = ballSpeed + paddleSpeed * 0.5f;
+                    ball.direction = resultSpeed.normalized;
+                    
                     // ignoreCast.Add(paddle);
                     CastBallRecursively(ball, /*ignoreCast,*/ ref step, ref left);
                     return;
@@ -121,8 +132,8 @@ namespace MyPong.Core
                 var leftTmp = point - start;
                 step -= leftTmp;
                 left += leftTmp;
-                step = Vector2.Reflect(step, normal);
                 ball.direction = Vector2.Reflect(ball.direction, normal).normalized;
+                step = ball.direction * step.magnitude;
                 return true;
             }
             return false;
