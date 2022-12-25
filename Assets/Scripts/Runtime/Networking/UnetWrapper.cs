@@ -147,7 +147,8 @@ namespace MyPong.Networking
             NetworkManager.ConnectionApprovalRequest request,
             NetworkManager.ConnectionApprovalResponse response)
         {
-            if (NetworkManager.ConnectedClientsIds.Count < 2 || request.ClientNetworkId == NetworkManager.LocalClientId)
+            if (NetworkManager.ConnectedClientsIds.Count < Constants.Network.PlayersCount
+                || request.ClientNetworkId == NetworkManager.LocalClientId)
             {
                 response.Approved = true;
                 response.CreatePlayerObject = true;
@@ -162,7 +163,7 @@ namespace MyPong.Networking
         private void CheckClientsCount()
         {
             Debug.Log($"TOTAL CLIENTS: {_connectedClients.Count}".Bold().Color(Color.yellow));
-            _onPlayersEnough.OnNext(_connectedClients.Count >= 2);
+            _onPlayersEnough.OnNext(_connectedClients.Count >= Constants.Network.PlayersCount);
         }
 
         public void Shutdown()

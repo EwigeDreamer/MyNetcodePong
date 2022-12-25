@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Extensions.Vectors;
 using MyPong.Core.Interfaces;
 using MyPong.Core.Objects;
 using MyPong.Core.Physics;
@@ -43,6 +44,8 @@ namespace MyPong.Core
 
         public void Update(float deltaTime)
         {
+            foreach (var paddle in Paddles)
+                MovePaddle(paddle, deltaTime);
             MoveBall(deltaTime);
         }
 
@@ -59,20 +62,28 @@ namespace MyPong.Core
 
         private void MovePaddle(Paddle paddle, float deltaTime)
         {
-            var speed = paddle.currentSpeed;
-            
+            var currPos = paddle.position.x;
+            var trgtPos = paddle.targetPosition;
+
+            //ускорение
+            paddle.currentSpeed += Math.Sign(trgtPos - currPos) * paddle.acceleration * deltaTime;
+            //замедление вблизи
+            paddle.currentSpeed *= (float)Math.Pow(Math.Abs(trgtPos - currPos) / Field.Scale.x, 1f/4f);
+            //ограничение
+            paddle.currentSpeed = Math.Clamp(paddle.currentSpeed, -paddle.maxSpeed, paddle.maxSpeed);
+            //перемещение
+            currPos += paddle.currentSpeed * deltaTime;
+
+            paddle.position = paddle.position.SetX(currPos);
         }
         
-
-        // private readonly HashSet<ICastable> IgnoreCast = new();
         private void MoveBall(float deltaTime)
         {
             var ball = Ball;
             var step = ball.direction * ball.speed * deltaTime;
             var left = Vector2.zero;
             
-            // IgnoreCast.Clear();
-            CastBallRecursively(ball, /*IgnoreCast,*/ ref step, ref left);
+            CastBallRecursively(ball, ref step, ref left);
 
             foreach (var goal in Field.Goals)
             {
@@ -89,22 +100,19 @@ namespace MyPong.Core
             ball.position += left + step;
         }
 
-        private void CastBallRecursively(Ball ball, /*HashSet<ICastable> ignoreCast,*/ ref Vector2 step, ref Vector2 left)
+        private void CastBallRecursively(Ball ball, ref Vector2 step, ref Vector2 left)
         {
             foreach (var wall in Field.Walls)
             {
-                // if (ignoreCast.Contains(wall)) continue;
                 if (CheckCast(ball, wall, ref step, ref left, out var point))
                 {
                     OnBallBounce?.Invoke(ball, point);
-                    // ignoreCast.Add(wall);
-                    CastBallRecursively(ball, /*ignoreCast,*/ ref step, ref left);
+                    CastBallRecursively(ball, ref step, ref left);
                     return;
                 }
             }
             foreach (var paddle in Paddles)
             {
-                // if (ignoreCast.Contains(paddle)) continue;
                 if (CheckCast(ball, paddle, ref step, ref left, out var point))
                 {
                     OnBallBounce?.Invoke(ball, point);
@@ -116,8 +124,7 @@ namespace MyPong.Core
                     var resultSpeed = ballSpeed + paddleSpeed * 0.5f;
                     ball.direction = resultSpeed.normalized;
                     
-                    // ignoreCast.Add(paddle);
-                    CastBallRecursively(ball, /*ignoreCast,*/ ref step, ref left);
+                    CastBallRecursively(ball, ref step, ref left);
                     return;
                 }
             }

@@ -11,6 +11,8 @@ namespace MyPong.Core.Objects
         public Vector2 position;
         public float width;
         public float thickness;
+
+        public float targetPosition;
         public float currentSpeed;
         public float targetSpeed;
         public float maxSpeed;
@@ -31,11 +33,6 @@ namespace MyPong.Core.Objects
             this.targetSpeed = default;
             this.maxSpeed = maxSpeed;
             this.acceleration = default;
-        }
-
-        public void SetPosition(float x)
-        {
-            position = position.SetX(x);
         }
 
         public bool LineCast(Vector2 start, Vector2 end, out Vector2 point, out Vector2 normal)

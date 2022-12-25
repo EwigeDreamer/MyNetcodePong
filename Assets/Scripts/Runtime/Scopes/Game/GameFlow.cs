@@ -106,10 +106,9 @@ namespace MyPong
             }
         }
 
-        private async void OnStartHost(Unit _)
+        private void OnStartHost(Unit _)
         {
-            await UniTask.WhenAll(
-                PopupService.OpenPopup<WaitClientsPopup>());
+            
         }
 
         private void OnStartClient(Unit _)

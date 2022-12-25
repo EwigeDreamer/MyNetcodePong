@@ -48,10 +48,14 @@ namespace MyPong.Core
             Observable.EveryUpdate().Subscribe(Update).AddTo(_disposable);
 
             var players = UnetWrapper.GetAllPlayers();
+            
             var player0 = players.First(a => UnetWrapper.ItsMe(a.OwnerClientId));
+            player0.OnPositionControl.Subscribe(v => _core.Paddles[0].targetPosition = v).AddTo(_disposable);
+            
+#if !PONG_BOT
             var player1 = players.First(a => !UnetWrapper.ItsMe(a.OwnerClientId));
-            player0.OnPositionControl.Subscribe(v => _core.Paddles[0].SetPosition(v)).AddTo(_disposable);
-            player1.OnPositionControl.Subscribe(v => _core.Paddles[1].SetPosition(-v)).AddTo(_disposable);
+            player1.OnPositionControl.Subscribe(v => _core.Paddles[1].targetPosition = -v).AddTo(_disposable);
+#endif
         }
 
         public void StopCoreGameplay()
@@ -65,8 +69,8 @@ namespace MyPong.Core
         private void Update(long _)
         {
             var dt = Time.deltaTime;
-#if UNITY_EDITOR
-            _core.Paddles[1].position = _core.Paddles[1].position.SetX(_core.Ball.position.x);
+#if PONG_BOT
+            _core.Paddles[1].targetPosition = _core.Ball.position.x;
 #endif
             _core.Update(dt);
             _view.UpdateView();
