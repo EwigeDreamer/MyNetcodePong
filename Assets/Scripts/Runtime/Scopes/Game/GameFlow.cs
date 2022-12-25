@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using MyPong.Core;
 using MyPong.UI;
 using MyPong.UI.Popups;
@@ -30,8 +31,13 @@ namespace MyPong
 
         public void Start()
         {
-            UnetWrapper.OnConnected.Subscribe(_ => OnConnect()).AddTo(_disposables);
-            UnetWrapper.OnDisconnect.Subscribe(_ => OnDisconnect()).AddTo(_disposables);
+            UnetWrapper.OnConnectedToServer.Subscribe(OnConnectedToServer).AddTo(_disposables);
+            UnetWrapper.OnDisconnectFromServer.Subscribe(OnDisconnectFromServer).AddTo(_disposables);
+            UnetWrapper.OnStartHost.Subscribe(OnStartHost).AddTo(_disposables);
+            UnetWrapper.OnStartClient.Subscribe(OnStartClient).AddTo(_disposables);
+            UnetWrapper.OnShutdown.Subscribe(OnShutdown).AddTo(_disposables);
+            UnetWrapper.OnPlayersEnough.Subscribe(OnPlayersEnough).AddTo(_disposables);
+            
             StartGame();
         }
 
@@ -41,21 +47,55 @@ namespace MyPong
             LoadingScreen.Hide();
         }
 
-        private async void OnConnect()
+        private async void OnConnectedToServer(ulong id)
         {
-            await PopupService.CloseAll<HostSettingsPopup>();
-            await PopupService.CloseAll<ClientSettingsPopup>();
-            await PopupService.OpenPopup<GameHudPopup>();
-            
-            if (UnetWrapper.IsServer)
+            if (!UnetWrapper.IsServer)
             {
-                PongCoreController.StartCoreGameplay();
+                await UniTask.WhenAll(
+                    PopupService.OpenPopup<GameHudPopup>());
             }
         }
 
-        private async void OnDisconnect()
+        private async void OnDisconnectFromServer(ulong id)
         {
-            await PopupService.CloseAll<GameHudPopup>();
+            await UniTask.WhenAll(PopupService.CloseAll<GameHudPopup>());
+        }
+
+        private async void OnPlayersEnough(bool value)
+        {
+            if (value)
+            {
+                PongCoreController.StartCoreGameplay();
+                await UniTask.WhenAll(
+                    PopupService.CloseAll<WaitClientsPopup>(),
+                    PopupService.OpenPopup<GameHudPopup>());
+            }
+            else
+            {
+                PongCoreController.StopCoreGameplay();
+                await UniTask.WhenAll(
+                    PopupService.CloseAll<GameHudPopup>(),
+                    PopupService.OpenPopup<WaitClientsPopup>());
+            }
+        }
+
+        private async void OnStartHost(Unit _)
+        {
+            await UniTask.WhenAll(
+                PopupService.OpenPopup<WaitClientsPopup>());
+        }
+
+        private async void OnStartClient(Unit _)
+        {
+            await UniTask.WhenAll(
+                PopupService.OpenPopup<GameHudPopup>());
+        }
+
+        private async void OnShutdown(Unit _)
+        {
+            await UniTask.WhenAll(
+                PopupService.CloseAll<GameHudPopup>(),
+                PopupService.CloseAll<WaitClientsPopup>());
         }
 
         public void Dispose()

@@ -5,11 +5,11 @@ using UnityEngine.UI;
 
 namespace MyPong.UI.Popups
 {
-    [UnityEngine.Scripting.Preserve]
-    public class GameHudPopupController : BasePopupController
+    public class WaitClientsPopupController : BasePopupController
     {
         public readonly UnetWrapper UnetWrapper;
-        public GameHudPopupController(
+        
+        public WaitClientsPopupController(
             PopupService popupService,
             UnetWrapper unetWrapper)
             : base(popupService)
@@ -17,31 +17,23 @@ namespace MyPong.UI.Popups
             UnetWrapper = unetWrapper;
         }
     }
-    
-    public class GameHudPopup : BasePopupWithController<GameHudPopup.Data, GameHudPopupController>
+    public class WaitClientsPopup : BasePopupWithController<WaitClientsPopup.Data, WaitClientsPopupController>
     {
-        [SerializeField] private Button _sutdownButton;
-        
         public override bool IsUnclosable => false;
         public override bool IsOnlyOne => true;
+
+        [SerializeField] private Button _cancelButton;
         
         protected override void InternalInit()
         {
-            _sutdownButton.OnClickAsObservable().Subscribe(_ =>
-            {
-                Controller.UnetWrapper.Shutdown();
-                ClosePopup();
-            }).AddTo(this);
+            _cancelButton.OnClickAsObservable().Subscribe(_ => Controller.UnetWrapper.Shutdown()).AddTo(this);
         }
-
+        
         public override void Dispose()
         {
             
         }
         
-        public class Data : IPopupData
-        {
-            
-        }
+        public class Data : IPopupData { }
     }
 }

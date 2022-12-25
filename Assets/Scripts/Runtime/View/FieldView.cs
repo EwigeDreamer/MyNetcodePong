@@ -11,6 +11,7 @@ namespace MyPong.View
         [SerializeField] private Transform _square;
         
         private Field _field;
+        private Vector2 _fieldScale = Vector2.zero;
 
         public FieldView Init(Field field)
         {
@@ -22,6 +23,19 @@ namespace MyPong.View
         {
             transform.localPosition = Vector3.zero;
             _square.localScale = _field.Scale.ToV3_xy0().SetZ(1f);
+            if (_field.Scale != _fieldScale)
+            {
+                _fieldScale = _field.Scale;
+                SetCameraFocusClientRpc(_field.Scale);
+            }
+        }
+
+        [ClientRpc]
+        private void SetCameraFocusClientRpc(Vector2 fieldScale)
+        {
+            var cameraController = FindObjectOfType<CameraController>();
+            if (cameraController != null)
+                cameraController.FocusOnField(fieldScale);
         }
     }
 }

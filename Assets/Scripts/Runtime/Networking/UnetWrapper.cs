@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 using DG.Tweening;
+using Extensions.Strings;
 using MyPong.UI;
+using MyPong.UI.Popups;
 using UniRx;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
@@ -14,11 +17,20 @@ namespace MyPong
     {
         public readonly NetworkManager NetworkManager;
         public readonly ScreenLocker ScreenLocker;
+        public readonly PopupService PopupService;
 
-        private Subject<Unit> _onConnected = new();
-        private Subject<Unit> _onDisconnect = new();
-        public IObservable<Unit> OnConnected => _onConnected;
-        public IObservable<Unit> OnDisconnect => _onDisconnect;
+        private Subject<ulong> _onConnectedToServer = new();
+        private Subject<ulong> _onDisconnectFromServer = new();
+        private Subject<Unit> _onShutdown = new();
+        private Subject<Unit> _onStartHost = new();
+        private Subject<Unit> _onStartClient = new();
+        private Subject<bool> _onPlayersEnough = new();
+        public IObservable<ulong> OnConnectedToServer => _onConnectedToServer;
+        public IObservable<ulong> OnDisconnectFromServer => _onDisconnectFromServer;
+        public IObservable<Unit> OnShutdown => _onShutdown;
+        public IObservable<Unit> OnStartHost => _onStartHost;
+        public IObservable<Unit> OnStartClient => _onStartClient;
+        public IObservable<bool> OnPlayersEnough => _onPlayersEnough;
 
         public UnityTransport Transport => NetworkManager.NetworkConfig.NetworkTransport as UnityTransport;
         public bool IsServer => NetworkManager.IsServer;
@@ -26,12 +38,16 @@ namespace MyPong
         public bool IsRunning => IsServer || IsClient;
         public bool ItsMe(ulong id) => id == NetworkManager.LocalClientId;
 
+        private readonly List<ulong> _connectedClients = new();
+
         public UnetWrapper(
             NetworkManager networkManager,
-            ScreenLocker screenLocker)
+            ScreenLocker screenLocker,
+            PopupService popupService)
         {
             NetworkManager = networkManager;
             ScreenLocker = screenLocker;
+            PopupService = popupService;
 
             NetworkManager.OnServerStarted += () => Debug.LogError(nameof(NetworkManager.OnServerStarted));
             NetworkManager.OnTransportFailure += () => Debug.LogError(nameof(NetworkManager.OnTransportFailure));
@@ -44,7 +60,7 @@ namespace MyPong
 
 
         private Tween _connectWaiter = null;
-        private void StartConnectWaiter()
+        private void StartConnectScreenLocker()
         {
             var connectTimeout = Transport.ConnectTimeoutMS * Transport.MaxConnectAttempts / 1000f;
             if (_connectWaiter != null)
@@ -54,7 +70,7 @@ namespace MyPong
                 .OnComplete(() => ScreenLocker.Hide(ScreenLockTypes.Unet))
                 .Play();
         }
-        private void StopConnectWaiter()
+        private void StopConnectScreenLocker()
         {
             if (_connectWaiter != null)
                 _connectWaiter.Kill(true);
@@ -63,19 +79,29 @@ namespace MyPong
 
         private void OnClientConnected(ulong id)
         {
-            StopConnectWaiter();
-            _onConnected.OnNext(default);
+            if (IsServer)
+            {
+                _connectedClients.Add(id);
+                CheckClientsCount();
+            }
+            StopConnectScreenLocker();
+            _onConnectedToServer.OnNext(id);
         }
 
         private void OnClientDisconnect(ulong id)
         {
+            if (IsServer)
+            {
+                _connectedClients.Remove(id);
+                CheckClientsCount();
+            }
             if (!IsServer || ItsMe(id))
             {
                 // NetworkManager.Shutdown();
-                _onDisconnect.OnNext(default);
+                _onDisconnectFromServer.OnNext(id);
             }
         }
-        
+
         public bool StartClient(string ip, string portStr)
         {
             if (!NetworkUtility.IsValidIPv4(ip)) return false;
@@ -84,9 +110,12 @@ namespace MyPong
             var port = ushort.Parse(portStr);
 
             Transport.SetConnectionData(ip, port);
-            StartConnectWaiter();
-
-            return NetworkManager.StartClient();
+            StartConnectScreenLocker();
+            
+            var result = NetworkManager.StartClient();
+            if (result)
+                _onStartHost.OnNext(default);
+            return result;
         }
 
         public bool StartHost(string portStr)
@@ -98,7 +127,11 @@ namespace MyPong
 
             Transport.SetConnectionData(ip, port);
             NetworkManager.ConnectionApprovalCallback = ApprovalCheck;
-            return NetworkManager.StartHost();
+            
+            var result = NetworkManager.StartHost();
+            if (result)
+                _onStartHost.OnNext(default);
+            return result;
         }
 
         private void ApprovalCheck(
@@ -114,6 +147,26 @@ namespace MyPong
             {
                 response.Approved = false;
                 response.Reason = "Server is full";
+            }
+        }
+
+        private void CheckClientsCount()
+        {
+            Debug.Log($"TOTAL CLIENTS: {_connectedClients.Count}".Bold().Color(Color.yellow));
+            _onPlayersEnough.OnNext(_connectedClients.Count >= 2);
+        }
+
+        public void Shutdown()
+        {
+            NetworkManager.Shutdown();
+            _onShutdown.OnNext(default);
+        }
+
+        public void ForEachPlayer(Action<NetworkPlayer> action)
+        {
+            foreach (var c in NetworkManager.ConnectedClientsList)
+            {
+                action?.Invoke(c.PlayerObject.GetComponent<NetworkPlayer>());
             }
         }
     }
