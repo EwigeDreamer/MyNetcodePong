@@ -46,7 +46,10 @@ namespace MyPong.Core
         private void ResetBall()
         {
             Ball.position = Vector2.zero;
-            Ball.direction = new Vector2(Random.Range(-1f, 1f), Random.Range(-1, 2)).normalized;
+            Ball.direction = new Vector2(
+                Random.Range(-1f, 1f),
+                Random.Range(0, 2) > 0 ? -1f : 1f)
+                .normalized;
             Ball.speed = StartBallSpeed;
         }
 
