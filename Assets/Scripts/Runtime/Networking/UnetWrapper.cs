@@ -46,10 +46,10 @@ namespace MyPong
             NetworkManager = networkManager;
             ScreenLocker = screenLocker;
 
-            NetworkManager.OnServerStarted += () => Debug.LogError(nameof(NetworkManager.OnServerStarted));
-            NetworkManager.OnTransportFailure += () => Debug.LogError(nameof(NetworkManager.OnTransportFailure));
-            NetworkManager.OnClientConnectedCallback += id => Debug.LogError($"{nameof(NetworkManager.OnClientConnectedCallback)}: {id} {id == NetworkManager.LocalClientId}");
-            NetworkManager.OnClientDisconnectCallback += id => Debug.LogError($"{nameof(NetworkManager.OnClientDisconnectCallback)}: {id} {id == NetworkManager.LocalClientId}");
+            NetworkManager.OnServerStarted += () => Debug.Log(nameof(NetworkManager.OnServerStarted).Bold());
+            NetworkManager.OnTransportFailure += () => Debug.LogWarning(nameof(NetworkManager.OnTransportFailure).Bold());
+            NetworkManager.OnClientConnectedCallback += id => Debug.Log($"{nameof(NetworkManager.OnClientConnectedCallback).Bold()}: id: {id.ToString().Bold()}, it's me: {id == NetworkManager.LocalClientId}");
+            NetworkManager.OnClientDisconnectCallback += id => Debug.Log($"{nameof(NetworkManager.OnClientDisconnectCallback).Bold()}: id: {id.ToString().Bold()}, it's me: {id == NetworkManager.LocalClientId}");
 
             NetworkManager.OnClientConnectedCallback += OnClientConnected;
             NetworkManager.OnClientDisconnectCallback += OnClientDisconnect;
@@ -79,7 +79,6 @@ namespace MyPong
             if (IsServer)
             {
                 _connectedClients.Add(id);
-                Debug.LogError($"GOVNOOOOOOOOOOOOOOOOOOO {id} {_connectedClients.Count}".Bold().Color(Color.green));
                 CheckClientsCount();
             }
             StopConnectScreenLocker();
@@ -91,7 +90,6 @@ namespace MyPong
             if (IsServer)
             {
                 _connectedClients.Remove(id);
-                Debug.LogError($"GOVNOOOOOOOOOOOOOOOOOOO {id} {_connectedClients.Count}".Bold().Color(Color.red));
                 CheckClientsCount();
             }
             if (!IsServer || ItsMe(id))
