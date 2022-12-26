@@ -35,6 +35,7 @@ namespace MyPong.UI.Popups
                 counter
                     .AppendCallback(() =>
                     {
+                        text.text = t.ToString();
                         text.gameObject.SetActive(true);
                         textGroup.alpha = 0f;
                         text.transform.localScale = Vector3.one * 1.25f;
