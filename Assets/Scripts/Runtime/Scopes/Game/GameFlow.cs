@@ -10,6 +10,7 @@ using VContainer.Unity;
 using UniRx;
 using Unity.Netcode;
 using UnityEngine;
+using NetworkPlayer = MyPong.Networking.NetworkPlayer;
 
 namespace MyPong
 {
@@ -52,10 +53,21 @@ namespace MyPong
             UnetWrapper.SpawnEventService.OnSpawnNetworkObject
                 .Select(a => a.GetComponent<FieldView>())
                 .Where(a => a != null)
-                .Subscribe(fv => fv.OnChangeScale
+                .Subscribe(field => field.OnChangeScale
                     .Subscribe(a => OnFieldViewChange(a.field, a.scale))
-                    .AddTo(fv))
+                    .AddTo(field))
                 .AddTo(_disposables);
+
+            UnetWrapper.SpawnEventService.OnSpawnNetworkObject
+                .Select(a => a.GetComponent<NetworkPlayer>())
+                .Where(a => a != null)
+                .Where(a => UnetWrapper.ItsMe(a.OwnerClientId))
+                .Subscribe(player => player.OnGameOver
+                    .Subscribe(_ => OnClientGameOver(player))
+                    .AddTo(player))
+                .AddTo(_disposables);
+
+            PongCoreController.OnGameOver.Subscribe(OnCoreGameOver).AddTo(_disposables);
             
             StartGame();
         }
@@ -73,6 +85,26 @@ namespace MyPong
             LoadingScreen.Hide();
         }
 
+        //call only on HOST
+        private void OnCoreGameOver(Unit _)
+        {
+            PongCoreController.Pause();
+            foreach (var player in UnetWrapper.GetAllPlayers())
+                player.OnGameOverClientRpc();
+        }
+
+        private async void OnClientGameOver(NetworkPlayer player)
+        {
+            var myScore = player.MyScoreRx.Value;
+            var enemyScore = player.EnemyScoreRx.Value;
+            if (myScore > enemyScore)
+                await PopupService.OpenPopup<MessagePopup>(new MessagePopup.Data("You won!", UnetWrapper.Shutdown));
+            else if (myScore > enemyScore)
+                await PopupService.OpenPopup<MessagePopup>(new MessagePopup.Data("You lose!", UnetWrapper.Shutdown));
+            else
+                await PopupService.OpenPopup<MessagePopup>(new MessagePopup.Data("Tie... How?", UnetWrapper.Shutdown));
+        }
+
         private async void OnConnectedToServer(ulong id)
         {
             if (!UnetWrapper.IsServer)
@@ -81,7 +113,7 @@ namespace MyPong
                     PopupService.OpenPopup<StartTimerPopup>(
                         new StartTimerPopup.Data(
                             Constants.Gameplay.StartTimerSeconds,
-                            () => PopupService.OpenPopup<GameHudPopup>())));
+                            () => PopupService.OpenPopup<GameHudPopup>().Forget())));
             }
         }
 
@@ -92,6 +124,7 @@ namespace MyPong
                 PopupService.CloseAll<GameHudPopup>());
         }
 
+        //call only on HOST
         private async void OnPlayersEnough(bool value)
         {
             if (value)
@@ -101,7 +134,7 @@ namespace MyPong
                     PopupService.CloseAll<WaitClientsPopup>(),
                     PopupService.OpenPopup<StartTimerPopup>(new StartTimerPopup.Data(
                         Constants.Gameplay.StartTimerSeconds,
-                        () => PopupService.OpenPopup<GameHudPopup>())));
+                        () => PopupService.OpenPopup<GameHudPopup>().Forget())));
             }
             else
             {

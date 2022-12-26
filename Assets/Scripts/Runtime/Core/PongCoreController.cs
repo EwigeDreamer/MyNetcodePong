@@ -21,9 +21,12 @@ namespace MyPong.Core
 
         private CompositeDisposable _disposable;
         private int[] _scores = new int[2];
+        private bool _isPaused = false;
 
         private readonly Subject<int> _onGoal = new();
+        private readonly Subject<Unit> _onGameOver = new();
         public IObservable<int> OnGoal => _onGoal;
+        public IObservable<Unit> OnGameOver => _onGameOver;
         public IReadOnlyList<int> Scores => _scores;
 
         public bool IsRunning => _core != null;
@@ -34,7 +37,7 @@ namespace MyPong.Core
             UnetWrapper = unetWrapper;
         }
         
-        //запускается только на HOST'е
+        //call only on HOST
         public async void StartCoreGameplay()
         {
             if (_core != null) return;
@@ -71,9 +74,16 @@ namespace MyPong.Core
             player1.OnPositionControl.Subscribe(v => SetPaddleTargetPosition(1, -v)).AddTo(_disposable);
             _core.OnGoal.Subscribe(_ => player1.SetScoreClientRpc(_scores[1], _scores[0])).AddTo(_disposable);
 #endif
-
             await UniTask.Delay(Constants.Gameplay.StartTimerSeconds * 1000);
+            _core.OnGoal.Subscribe(_ => CheckScore()).AddTo(_disposable);
             Observable.EveryUpdate().Subscribe(Update).AddTo(_disposable);
+        }
+
+        private void CheckScore()
+        {
+            var max = Constants.Gameplay.MaxScore;
+            if (_scores[0] >= max || _scores[1] >= max)
+                _onGameOver.OnNext(default);
         }
 
         private void SetPaddleTargetPosition(int id, float position)
@@ -91,6 +101,8 @@ namespace MyPong.Core
 
         private void Update(long _)
         {
+            if (_isPaused) return;
+            
             var dt = Time.deltaTime;
 #if PONG_BOT
             _core.Paddles[1].targetPosition = _core.Ball.position.x;
@@ -102,6 +114,16 @@ namespace MyPong.Core
         public void Dispose()
         {
             StopCoreGameplay();
+        }
+
+        public void Pause()
+        {
+            _isPaused = true;
+        }
+
+        public void Resume()
+        {
+            _isPaused = false;
         }
     }
 }

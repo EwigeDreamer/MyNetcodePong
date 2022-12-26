@@ -11,8 +11,10 @@ namespace MyPong.Networking
         public readonly ReactiveProperty<int> MyScoreRx = new(0);
         public readonly ReactiveProperty<int> EnemyScoreRx = new(0);
 
-        private Subject<float> _onPositionControl = new();
+        private readonly Subject<float> _onPositionControl = new();
+        private readonly Subject<Unit> _onGameOver = new();
         public IObservable<float> OnPositionControl => _onPositionControl;
+        public IObservable<Unit> OnGameOver => _onGameOver;
         
         
         [ServerRpc]
@@ -26,6 +28,12 @@ namespace MyPong.Networking
         {
             MyScoreRx.Value = myScore;
             EnemyScoreRx.Value = enemyScore;
+        }
+
+        [ClientRpc]
+        public void OnGameOverClientRpc()
+        {
+            _onGameOver.OnNext(default);
         }
         
 

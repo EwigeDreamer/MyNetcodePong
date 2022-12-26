@@ -20,6 +20,7 @@ namespace MyPong
         public static class Gameplay
         {
             public const int StartTimerSeconds = 3;
+            public const int MaxScore = 10;
         }
     }
 }

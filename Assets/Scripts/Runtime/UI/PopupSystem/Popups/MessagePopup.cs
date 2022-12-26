@@ -1,3 +1,4 @@
+using System;
 using MyPong.UI.Popups.Base;
 using TMPro;
 using UniRx;
@@ -15,6 +16,7 @@ namespace MyPong.UI.Popups
     public class MessagePopup : BasePopupWithController<MessagePopup.Data, MessagePopupController>
     {
         [SerializeField] private TMP_Text _messageText;
+        [SerializeField] private Button _bgButton;
         [SerializeField] private Button _okButton;
 
         public override bool IsUnclosable => false;
@@ -23,7 +25,14 @@ namespace MyPong.UI.Popups
         protected override void InternalInit()
         {
             _messageText.text = PopupData.Message;
-            _okButton.OnClickAsObservable().Subscribe(_ => ClosePopup()).AddTo(this);
+            _bgButton.OnClickAsObservable().Subscribe(_ => OkClick()).AddTo(this);
+            _okButton.OnClickAsObservable().Subscribe(_ => OkClick()).AddTo(this);
+        }
+
+        private void OkClick()
+        {
+            PopupData.OnClose?.Invoke();
+            ClosePopup();
         }
 
         public override void Dispose() { }
@@ -31,7 +40,12 @@ namespace MyPong.UI.Popups
         public class Data : IPopupData
         {
             public readonly string Message;
-            public Data(string message) => Message = message;
+            public readonly Action OnClose;
+            public Data(string message, Action onClose = null)
+            {
+                Message = message;
+                OnClose = onClose;
+            }
         }
     }
 }
