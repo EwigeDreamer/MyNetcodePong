@@ -58,7 +58,6 @@ namespace MyPong.View
             ToDestroy.Add(ballView.gameObject);
 
             PongCore.OnBallReset.Subscribe(d => ballView.TeleportClientRpc(d.point));
-            PongCore.OnBallBounce.Subscribe(d => ballView.TeleportClientRpc(d.point));
             
             UpdateView();
         }
