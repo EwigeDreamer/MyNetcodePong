@@ -23,7 +23,13 @@ namespace MyPong.Core.Objects
             position + Vector2.right * width / 2f,
             thickness / 2f);
 
-        public Paddle(int id, Vector2 position, float width, float thickness, float maxSpeed)
+        public Paddle(
+            int id,
+            Vector2 position,
+            float width,
+            float thickness,
+            float maxSpeed,
+            float acceleration)
         {
             this.id = id;
             this.position = position;
@@ -32,7 +38,7 @@ namespace MyPong.Core.Objects
             this.currentSpeed = default;
             this.targetSpeed = default;
             this.maxSpeed = maxSpeed;
-            this.acceleration = default;
+            this.acceleration = acceleration;
         }
 
         public bool LineCast(Vector2 start, Vector2 end, out Vector2 point, out Vector2 normal)

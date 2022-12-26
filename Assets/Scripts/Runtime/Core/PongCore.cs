@@ -26,6 +26,7 @@ namespace MyPong.Core
             float paddleWidth,
             float paddleThickness,
             float paddleMaxSpeed,
+            float paddleAcceleration,
             float ballScale,
             float ballSpeed,
             float ballSpeedIncrease)
@@ -33,8 +34,19 @@ namespace MyPong.Core
             Field = new Field(fieldScale);
             Paddles = new[]
             {
-                new Paddle(0, new Vector2(0f, -fieldScale.y / 2f + 1f), paddleWidth, paddleThickness, paddleMaxSpeed),
-                new Paddle(1, new Vector2(0f, fieldScale.y / 2f - 1f), paddleWidth, paddleThickness, paddleMaxSpeed),
+                new Paddle(
+                    0,
+                    new Vector2(0f, -fieldScale.y / 2f + 1f),
+                    paddleWidth,
+                    paddleThickness,
+                    paddleMaxSpeed,
+                    paddleAcceleration),
+                new Paddle(1,
+                    new Vector2(0f, fieldScale.y / 2f - 1f),
+                    paddleWidth,
+                    paddleThickness,
+                    paddleMaxSpeed,
+                    paddleAcceleration),
             };
             Ball = new Ball(Vector2.zero, ballScale / 2f);
             StartBallSpeed = ballSpeed;
@@ -62,19 +74,34 @@ namespace MyPong.Core
 
         private void MovePaddle(Paddle paddle, float deltaTime)
         {
-            var currPos = paddle.position.x;
-            var trgtPos = paddle.targetPosition;
+            var currentPos = paddle.position.x;
+            var targetPos = paddle.targetPosition;
 
             //ускорение
-            paddle.currentSpeed += Math.Sign(trgtPos - currPos) * paddle.acceleration * deltaTime;
+            paddle.currentSpeed += Math.Sign(targetPos - currentPos) * paddle.acceleration * deltaTime;
             //замедление вблизи
-            paddle.currentSpeed *= (float)Math.Pow(Math.Abs(trgtPos - currPos) / Field.Scale.x, 1f/4f);
+            paddle.currentSpeed *= DragFunction((targetPos - currentPos) / Field.Scale.x);
             //ограничение
             paddle.currentSpeed = Math.Clamp(paddle.currentSpeed, -paddle.maxSpeed, paddle.maxSpeed);
             //перемещение
-            currPos += paddle.currentSpeed * deltaTime;
+            currentPos += paddle.currentSpeed * deltaTime;
 
-            paddle.position = paddle.position.SetX(currPos);
+            var range = Field.Scale.x * 0.5f - paddle.width * 0.5f - paddle.thickness * 0.5f;
+            if (Math.Abs(currentPos) > range)
+            {
+                paddle.currentSpeed = 0f;
+                currentPos = Math.Clamp(currentPos, -range, range);
+            }
+            paddle.position = paddle.position.SetX(currentPos);
+        }
+
+        private float DragFunction(float x)
+        {
+            x = Math.Abs(x);
+            var threshold = 0.25f;
+            var factor = 1f / 0.5f;
+            if (x < threshold) return (float)Math.Pow(x * factor, 1f / 4f);//ветвь параболы
+            return 1f;
         }
         
         private void MoveBall(float deltaTime)
@@ -121,7 +148,7 @@ namespace MyPong.Core
                     //трение
                     var paddleSpeed = Vector2.right * paddle.currentSpeed;
                     var ballSpeed = ball.direction * ball.speed;
-                    var resultSpeed = ballSpeed + paddleSpeed * 0.5f;
+                    var resultSpeed = ballSpeed + paddleSpeed;
                     ball.direction = resultSpeed.normalized;
                     
                     CastBallRecursively(ball, ref step, ref left);

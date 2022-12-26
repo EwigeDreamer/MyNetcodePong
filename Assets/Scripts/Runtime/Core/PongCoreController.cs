@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Extensions.Vectors;
+using MyPong.Core.Objects;
 using MyPong.Networking;
 using MyPong.View;
 using UniRx;
@@ -36,7 +37,8 @@ namespace MyPong.Core
                 ratio * 1.5f,
                 4f,
                 1f,
-                3f,
+                20f,
+                50f,
                 1f,
                 5f,
                 1f);
@@ -50,12 +52,17 @@ namespace MyPong.Core
             var players = UnetWrapper.GetAllPlayers();
             
             var player0 = players.First(a => UnetWrapper.ItsMe(a.OwnerClientId));
-            player0.OnPositionControl.Subscribe(v => _core.Paddles[0].targetPosition = v).AddTo(_disposable);
+            player0.OnPositionControl.Subscribe(v => SetPaddleTargetPosition(0, v)).AddTo(_disposable);
             
 #if !PONG_BOT
             var player1 = players.First(a => !UnetWrapper.ItsMe(a.OwnerClientId));
-            player1.OnPositionControl.Subscribe(v => _core.Paddles[1].targetPosition = -v).AddTo(_disposable);
+            player1.OnPositionControl.Subscribe(v => SetPaddleTargetPosition(1, -v)).AddTo(_disposable);
 #endif
+        }
+
+        private void SetPaddleTargetPosition(int id, float position)
+        {
+            _core.Paddles[id].targetPosition = position;
         }
 
         public void StopCoreGameplay()
