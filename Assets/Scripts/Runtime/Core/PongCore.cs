@@ -90,7 +90,7 @@ namespace MyPong.Core
             //перемещение
             currentPos += paddle.currentSpeed * deltaTime;
 
-            var range = Field.Scale.x * 0.5f - paddle.width * 0.5f - paddle.thickness * 0.5f;
+            var range = Field.Scale.x * 0.5f - paddle.GetWidth() * 0.5f - paddle.thickness * 0.5f;
             if (Math.Abs(currentPos) > range)
             {
                 paddle.currentSpeed = 0f;
@@ -111,7 +111,7 @@ namespace MyPong.Core
         private void MoveBall(float deltaTime)
         {
             var ball = Ball;
-            var step = ball.direction * ball.speed * deltaTime;
+            var step = ball.direction * ball.GetSpeed() * deltaTime;
             var left = Vector2.zero;
             
             CastBallRecursively(ball, ref step, ref left);
@@ -151,7 +151,7 @@ namespace MyPong.Core
                     
                     //трение
                     var paddleSpeed = Vector2.right * paddle.currentSpeed;
-                    var ballSpeed = ball.direction * ball.speed;
+                    var ballSpeed = ball.direction * ball.GetSpeed();
                     var resultSpeed = ballSpeed + paddleSpeed;
                     ball.direction = resultSpeed.normalized;
                     

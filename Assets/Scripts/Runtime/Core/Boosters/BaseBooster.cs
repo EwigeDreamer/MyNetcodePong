@@ -4,16 +4,22 @@ using UnityEngine;
 
 namespace MyPong.Core.Boosters
 {
-    public class BaseBooster : ICastable
+    public abstract class BaseBooster : ICastable
     {
         public Vector2 position;
         public float radius;
+        public float lifeTime;
+        public float duration;
 
-        public BaseBooster(Vector2 position, float radius)
+        public BaseBooster(Vector2 position, float radius, float lifeTime, float duration)
         {
             this.position = position;
             this.radius = radius;
+            this.lifeTime = lifeTime;
+            this.duration = duration;
         }
+
+        public abstract BaseBoosterEffect GetEffect();
 
         public Circle Collider => new(position, radius);
         

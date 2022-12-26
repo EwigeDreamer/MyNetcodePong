@@ -77,7 +77,16 @@ namespace MyPong.Core
             await UniTask.Delay((Constants.Gameplay.StartTimerSeconds + 1) * 1000);
             _core.OnGoal.Subscribe(_ => CheckScore()).AddTo(_disposable);
             Observable.EveryUpdate().Subscribe(Update).AddTo(_disposable);
+
+            Observable.Interval(TimeSpan.FromSeconds(1f)).Subscribe(_ => CreateBooster()).AddTo(_disposable);
+            
             Resume();
+        }
+
+        private void CreateBooster()
+        {
+            if (_isPaused) return;
+            Debug.LogError("CREATE BOOSTER!!!");
         }
 
         private void CheckScore()

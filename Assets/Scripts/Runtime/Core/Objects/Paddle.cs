@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using Extensions.Vectors;
+using MyPong.Core.Boosters;
 using MyPong.Core.Interfaces;
 using MyPong.Core.Physics;
 using UnityEngine;
@@ -7,6 +9,8 @@ namespace MyPong.Core.Objects
 {
     public class Paddle : ICastable
     {
+        public readonly List<BaseBoosterEffect> Effects = new();
+        
         public readonly int id;
         public Vector2 position;
         public float width;
@@ -17,11 +21,26 @@ namespace MyPong.Core.Objects
         public float targetSpeed;
         public float maxSpeed;
         public float acceleration;
-        
-        public Capsule Collider => new(
-            position + Vector2.left * width / 2f,
-            position + Vector2.right * width / 2f,
-            thickness / 2f);
+
+        public float GetWidth()
+        {
+            var w = width;
+            foreach (var e in Effects)
+                w = e.WidthEffect(w);
+            return w;
+        }
+
+        public Capsule Collider
+        {
+            get
+            {
+                var hw = GetWidth() / 2f;
+                return new(
+                    position + Vector2.left * hw,
+                    position + Vector2.right * hw,
+                    thickness / 2f);
+            }
+        }
 
         public Paddle(
             int id,
