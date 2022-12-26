@@ -28,7 +28,7 @@ namespace MyPong.Core
 
         private readonly Subject<int> _onGoal = new();
         private readonly Subject<Unit> _onGameOver = new();
-        
+
         public IObservable<int> OnGoal => _onGoal;
         public IObservable<Unit> OnGameOver => _onGameOver;
         public IReadOnlyList<int> Scores => _scores;

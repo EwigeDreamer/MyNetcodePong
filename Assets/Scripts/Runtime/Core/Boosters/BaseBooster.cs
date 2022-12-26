@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using MyPong.Core.Interfaces;
 using MyPong.Core.Physics;
 using UnityEngine;
@@ -19,7 +20,16 @@ namespace MyPong.Core.Boosters
             this.duration = duration;
         }
 
+        protected void RemoveOverlapEffects(List<BaseBoosterEffect> effects, BaseBoosterEffect effect)
+        {
+            int i = effects.Count;
+            while (i --> 0)
+                if (effects[i].GetType() == effect.GetType())
+                    effects.RemoveAt(i);
+        }
+
         public abstract BaseBoosterEffect GetEffect();
+        public abstract void ApplyBooster(PongCore core);
 
         public Circle Collider => new(position, radius);
         

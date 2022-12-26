@@ -16,14 +16,18 @@ namespace MyPong.Core
         public readonly IReadOnlyList<Paddle> Paddles;
         public readonly Ball Ball;
 
+        public readonly List<ICastable> CustomCastables = new();
+
         private readonly Subject<int> _onGoal = new();
         private readonly Subject<(Ball ball, Vector2 point)> _onBallBounce = new();
-        
+        private readonly Subject<ICastable> _onCustomCast = new();
+
         public IObservable<int> OnGoal => _onGoal;
         public IObservable<(Ball ball, Vector2 point)> OnBallBounce => _onBallBounce;
+        public IObservable<ICastable> OnCustomCast => _onCustomCast;
 
-        private readonly float StartBallSpeed; 
-        private readonly float BallSpeedIncrease; 
+        private readonly float StartBallSpeed;
+        private readonly float BallSpeedIncrease;
 
         public PongCore(
             Vector2 fieldScale,
@@ -115,6 +119,23 @@ namespace MyPong.Core
             var left = Vector2.zero;
             
             CastBallRecursively(ball, ref step, ref left);
+
+            //custom objects, e.g. boosters
+            for (int i = CustomCastables.Count - 1; i >= 0; --i)
+            {
+                var castable = CustomCastables[i];
+                if (castable == null)
+                    CustomCastables.RemoveAt(i);
+                else
+                {
+                    var start = ball.position + left;
+                    var cast = new Capsule(ball.position, start + step, ball.radius);
+                    if (castable.CircleCast(cast, out _, out _))
+                    {
+                        _onCustomCast.OnNext(castable);
+                    }
+                }
+            }
 
             foreach (var goal in Field.Goals)
             {

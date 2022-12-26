@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using MyPong.Core.Boosters;
 using MyPong.View;
@@ -21,28 +22,26 @@ namespace MyPong.Core
             PongCoreController = pongCoreController;
         }
         
-        private CompositeDisposable _interval;
+        private IDisposable _intervalSubscription;
 
         public void StartBoosters()
         {
-            _interval?.Dispose();
-            _interval = new();
-            Observable.Interval(TimeSpan.FromSeconds(Constants.Gameplay.BoostersSpawnInterval))
-                .Subscribe(_ => CreateBooster())
-                .AddTo(_interval);
+            _intervalSubscription?.Dispose();
+            _intervalSubscription = Observable.Interval(TimeSpan.FromSeconds(Constants.Gameplay.BoostersSpawnInterval))
+                .Subscribe(_ => CreateBooster());
         }
 
         public void StopBoosters()
         {
-            _interval?.Dispose();
-            _interval = null;
+            _intervalSubscription?.Dispose();
+            _intervalSubscription = null;
         }
 
-        private bool CanDo => !PongCoreController.IsPaused && PongCoreController.IsRunning;
+        private bool CanProcess => !PongCoreController.IsPaused && PongCoreController.IsRunning;
 
         private void CreateBooster()
         {
-            if (!CanDo) return;
+            if (!CanProcess) return;
             switch (Random.Range(0,3))
             {
                 case 0: CreateExpandPaddleBooster(); break;
@@ -50,10 +49,34 @@ namespace MyPong.Core
                 case 2: CreateSpeedBallBooster(); break;
             }
         }
+        
+        private async void CreateExpandPaddleBooster()
+        {
+            var pos = GetRandomBoosterPosition();
+            var booster = new ExpandPaddle(pos);
+            var prefab = await AssetService.LoadGameObjectFromAddressablesAsync<ExpandPaddleView>(ResourceType.View);
+            if (CanProcess) InitBooster(booster, prefab);
+        }
+
+        private async void CreateNarrowPaddleBooster()
+        {
+            var pos = GetRandomBoosterPosition();
+            var booster = new NarrowPaddle(pos);
+            var prefab = await AssetService.LoadGameObjectFromAddressablesAsync<NarrowPaddleView>(ResourceType.View);
+            if (CanProcess) InitBooster(booster, prefab);
+        }
+
+        private async void CreateSpeedBallBooster()
+        {
+            var pos = GetRandomBoosterPosition();
+            var booster = new SpeedBall(pos);
+            var prefab = await AssetService.LoadGameObjectFromAddressablesAsync<SpeedBallView>(ResourceType.View);
+            if (CanProcess) InitBooster(booster, prefab);
+        }
 
         private Vector2 GetRandomBoosterPosition()
         {
-            if (!CanDo) return default;
+            if (!CanProcess) return default;
             var core = PongCoreController.Core;
             var xRange = core.Field.Size.x;
             var yRange = core.Field.Size.y * 0.1f;
@@ -61,59 +84,29 @@ namespace MyPong.Core
             var y = Random.Range(-yRange, yRange);
             return new Vector2(x, y);
         }
-        
-        private async void CreateExpandPaddleBooster()
+
+        private async void InitBooster(BaseBooster booster, BaseBoosterView prefab)
         {
-            if (!CanDo) return;
-            var pos = GetRandomBoosterPosition();
-            var booster = new ExpandPaddle(pos);
-            var prefab = await AssetService.LoadGameObjectFromAddressablesAsync<ExpandPaddleView>(ResourceType.View);
-            if (!CanDo) return;
             var view = Object.Instantiate(prefab).Init(booster);
             view.NetworkObject.Spawn();
             view.transform.SetParent(PongCoreController.View.Container);
             view.UpdateView();
+            
+            PongCoreController.Core.CustomCastables.Add(booster);
+            var subscription = PongCoreController.Core.OnCustomCast
+                .Where(a => a == booster)
+                .Select(a=>a as BaseBooster)
+                .Subscribe(b =>
+                {
+                    b.ApplyBooster(PongCoreController.Core);
+                    if (view != null) Object.Destroy(view.gameObject);
+                });
 
             await UniTask.Delay(TimeSpan.FromSeconds(booster.lifeTime));
             
-            if (view != null)
-                Object.Destroy(view.gameObject);
-        }
-
-        private async void CreateNarrowPaddleBooster()
-        {
-            if (!CanDo) return;
-            var pos = GetRandomBoosterPosition();
-            var booster = new NarrowPaddle(pos);
-            var prefab = await AssetService.LoadGameObjectFromAddressablesAsync<NarrowPaddleView>(ResourceType.View);
-            if (!CanDo) return;
-            var view = Object.Instantiate(prefab).Init(booster);
-            view.NetworkObject.Spawn();
-            view.transform.SetParent(PongCoreController.View.Container);
-            view.UpdateView();
-
-            await UniTask.Delay(TimeSpan.FromSeconds(booster.lifeTime));
-            
-            if (view != null)
-                Object.Destroy(view.gameObject);
-        }
-
-        private async void CreateSpeedBallBooster()
-        {
-            if (!CanDo) return;
-            var pos = GetRandomBoosterPosition();
-            var booster = new SpeedBall(pos);
-            var prefab = await AssetService.LoadGameObjectFromAddressablesAsync<SpeedBallView>(ResourceType.View);
-            if (!CanDo) return;
-            var view = Object.Instantiate(prefab).Init(booster);
-            view.NetworkObject.Spawn();
-            view.transform.SetParent(PongCoreController.View.Container);
-            view.UpdateView();
-
-            await UniTask.Delay(TimeSpan.FromSeconds(booster.lifeTime));
-            
-            if (view != null)
-                Object.Destroy(view.gameObject);
+            if (view != null) Object.Destroy(view.gameObject);
+            subscription?.Dispose();
+            PongCoreController.Core?.CustomCastables.Remove(booster);
         }
     }
 }

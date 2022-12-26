@@ -1,3 +1,6 @@
+using System;
+using System.Linq;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace MyPong.Core.Boosters
@@ -20,6 +23,20 @@ namespace MyPong.Core.Boosters
         public override BaseBoosterEffect GetEffect()
         {
             return new PaddleWidthEffect(1f / NarrowFactor);
+        }
+
+        public override async void ApplyBooster(PongCore core)
+        {
+            if (core == null) return;
+            var id = core.Ball.id;
+            var effect = GetEffect();
+            var paddle = core.Paddles.First(a => a.id != id);
+
+            RemoveOverlapEffects(paddle.Effects, effect);
+
+            paddle.Effects.Add(effect);
+            await UniTask.Delay(TimeSpan.FromSeconds(duration));
+            paddle.Effects.Remove(effect);
         }
     }
 }

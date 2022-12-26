@@ -1,3 +1,5 @@
+using System;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace MyPong.Core.Boosters
@@ -20,6 +22,19 @@ namespace MyPong.Core.Boosters
         public override BaseBoosterEffect GetEffect()
         {
             return new BallSpeedEffect(SpeedFactor);
+        }
+
+        public override async void ApplyBooster(PongCore core)
+        {
+            if (core == null) return;
+            var effect = GetEffect();
+            var ball = core.Ball;
+
+            RemoveOverlapEffects(ball.Effects, effect);
+
+            ball.Effects.Add(effect);
+            await UniTask.Delay(TimeSpan.FromSeconds(duration));
+            ball.Effects.Remove(effect);
         }
     }
 }
