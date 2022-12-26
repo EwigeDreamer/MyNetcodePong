@@ -685,6 +685,7 @@ MonoBehaviour:
   _closeButton: {fileID: 0}
   _messageText: {fileID: 1352578035784894734}
   _exitButton: {fileID: 1352578036853151585}
+  _buttonContainer: {fileID: 6581932746422556729}
 --- !u!1 &3184519381779714709
 GameObject:
   m_ObjectHideFlags: 0

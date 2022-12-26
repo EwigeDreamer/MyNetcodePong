@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using MyPong.UI.Popups.Base;
 using TMPro;
 using UniRx;
@@ -16,6 +17,7 @@ namespace MyPong.UI.Popups
     {
         [SerializeField] private TMP_Text _messageText;
         [SerializeField] private Button _exitButton;
+        [SerializeField] private GameObject _buttonContainer;
         
         public override bool IsUnclosable => false;
         public override bool IsOnlyOne => true;
@@ -24,6 +26,14 @@ namespace MyPong.UI.Popups
         {
             _messageText.text = PopupData.Message;
             _exitButton.OnClickAsObservable().Subscribe(_ => ExitClick()).AddTo(this);
+            HideAndShowButton();
+        }
+
+        private async void HideAndShowButton()
+        {
+            _buttonContainer.SetActive(false);
+            await UniTask.Delay(3000);
+            _buttonContainer.SetActive(true);
         }
 
         private void ExitClick()
