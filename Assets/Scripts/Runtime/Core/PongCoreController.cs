@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Extensions.Vectors;
+using MyPong.Core.Boosters;
 using MyPong.Core.Objects;
 using MyPong.Networking;
 using MyPong.View;
 using UniRx;
 using UnityEngine;
+using Utilities;
+using Object = UnityEngine.Object;
+using Random = UnityEngine.Random;
 
 namespace MyPong.Core
 {
@@ -15,21 +19,21 @@ namespace MyPong.Core
     public class PongCoreController : IDisposable
     {
         private readonly UnetWrapper UnetWrapper;
-        
-        private PongCore _core;
-        private PongView _view;
+
+        public PongCore Core { get; private set; }
+        public PongView View { get; private set; }
 
         private CompositeDisposable _disposable;
         private int[] _scores = new int[2];
-        private bool _isPaused = false;
 
         private readonly Subject<int> _onGoal = new();
         private readonly Subject<Unit> _onGameOver = new();
+        
         public IObservable<int> OnGoal => _onGoal;
         public IObservable<Unit> OnGameOver => _onGameOver;
         public IReadOnlyList<int> Scores => _scores;
-
-        public bool IsRunning => _core != null;
+        public bool IsRunning => Core != null;
+        public bool IsPaused { get; private set; } = false;
 
         [UnityEngine.Scripting.Preserve]
         public PongCoreController(UnetWrapper unetWrapper)
@@ -40,9 +44,9 @@ namespace MyPong.Core
         //call only on HOST
         public async void StartCoreGameplay()
         {
-            if (_core != null) return;
+            if (Core != null) return;
             var ratio = new Vector2(9f, 16f);
-            _core = new(
+            Core = new(
                 ratio * 1.5f,
                 4f,
                 1f,
@@ -51,23 +55,23 @@ namespace MyPong.Core
                 1f,
                 5f,
                 1f);
-            _view = new(_core);
-            _view.Init().Forget();
+            View = new(Core);
+            View.Init().Forget();
             
             _disposable?.Dispose();
             _disposable = new();
 
             _scores[0] = 0;
             _scores[1] = 0;
-            _core.OnGoal.Where(id => id == 0).Subscribe(_ => _scores[0]++).AddTo(_disposable);
-            _core.OnGoal.Where(id => id == 1).Subscribe(_ => _scores[1]++).AddTo(_disposable);
+            Core.OnGoal.Where(id => id == 0).Subscribe(_ => _scores[0]++).AddTo(_disposable);
+            Core.OnGoal.Where(id => id == 1).Subscribe(_ => _scores[1]++).AddTo(_disposable);
 
-            _core.OnGoal.Subscribe(_onGoal.OnNext).AddTo(_disposable);
+            Core.OnGoal.Subscribe(_onGoal.OnNext).AddTo(_disposable);
             var players = UnetWrapper.GetAllPlayers();
             
             var player0 = players.First(a => UnetWrapper.ItsMe(a.OwnerClientId));
             player0.OnPositionControl.Subscribe(v => SetPaddleTargetPosition(0, v)).AddTo(_disposable);
-            _core.OnGoal.Subscribe(_ => player0.SetScoreClientRpc(_scores[0], _scores[1])).AddTo(_disposable);
+            Core.OnGoal.Subscribe(_ => player0.SetScoreClientRpc(_scores[0], _scores[1])).AddTo(_disposable);
             
 #if !PONG_BOT
             var player1 = players.First(a => !UnetWrapper.ItsMe(a.OwnerClientId));
@@ -75,18 +79,10 @@ namespace MyPong.Core
             _core.OnGoal.Subscribe(_ => player1.SetScoreClientRpc(_scores[1], _scores[0])).AddTo(_disposable);
 #endif
             await UniTask.Delay((Constants.Gameplay.StartTimerSeconds + 1) * 1000);
-            _core.OnGoal.Subscribe(_ => CheckScore()).AddTo(_disposable);
+            Core.OnGoal.Subscribe(_ => CheckScore()).AddTo(_disposable);
             Observable.EveryUpdate().Subscribe(Update).AddTo(_disposable);
 
-            Observable.Interval(TimeSpan.FromSeconds(1f)).Subscribe(_ => CreateBooster()).AddTo(_disposable);
-            
             Resume();
-        }
-
-        private void CreateBooster()
-        {
-            if (_isPaused) return;
-            Debug.LogError("CREATE BOOSTER!!!");
         }
 
         private void CheckScore()
@@ -98,27 +94,27 @@ namespace MyPong.Core
 
         private void SetPaddleTargetPosition(int id, float position)
         {
-            _core.Paddles[id].targetPosition = position;
+            Core.Paddles[id].targetPosition = position;
         }
 
         public void StopCoreGameplay()
         {
             _disposable?.Dispose();
-            _view?.Dispose();
-            _view = null;
-            _core = null;
+            View?.Dispose();
+            View = null;
+            Core = null;
         }
 
         private void Update(long _)
         {
-            if (_isPaused) return;
+            if (IsPaused) return;
             
             var dt = Time.deltaTime;
 #if PONG_BOT
-            _core.Paddles[1].targetPosition = _core.Ball.position.x;
+            Core.Paddles[1].targetPosition = Core.Ball.position.x;
 #endif
-            _core.Update(dt);
-            _view.UpdateView();
+            Core.Update(dt);
+            View.UpdateView();
         }
 
         public void Dispose()
@@ -128,12 +124,12 @@ namespace MyPong.Core
 
         public void Pause()
         {
-            _isPaused = true;
+            IsPaused = true;
         }
 
         public void Resume()
         {
-            _isPaused = false;
+            IsPaused = false;
         }
     }
 }

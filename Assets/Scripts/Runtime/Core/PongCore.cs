@@ -148,6 +148,7 @@ namespace MyPong.Core
                 {
                     _onBallBounce.OnNext((ball, point));
                     ball.SpeedUp();
+                    ball.id = paddle.id;
                     
                     //трение
                     var paddleSpeed = Vector2.right * paddle.currentSpeed;

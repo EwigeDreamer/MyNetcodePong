@@ -21,6 +21,8 @@ namespace MyPong.View
             PongCore = core;
             Scale = core.Field.Scale;
         }
+        
+        public Transform Container { get; private set; }
 
         public async UniTask Init()
         {
@@ -36,6 +38,7 @@ namespace MyPong.View
             Updatables.Add(fieldView);
             fieldView.OnDestroyAsObservable().Subscribe(_ => Updatables.Remove(fieldView));
             ToDestroy.Add(fieldView.gameObject);
+            Container = fieldView.transform;
             
             foreach (var paddle in PongCore.Paddles)
             {
@@ -69,6 +72,7 @@ namespace MyPong.View
                 UnityEngine.Object.Destroy(obj);
             ToDestroy.Clear();
             Updatables.Clear();
+            Container = null;
         }
     }
 }

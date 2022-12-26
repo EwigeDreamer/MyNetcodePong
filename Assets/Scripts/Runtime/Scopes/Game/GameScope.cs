@@ -19,6 +19,7 @@ namespace MyPong
             builder.RegisterComponent(_cameraController).AsSelf();
             builder.Register<PopupService>(Lifetime.Singleton).WithParameter(this);
             builder.Register<PongCoreController>(Lifetime.Singleton);
+            builder.Register<PongBoostersController>(Lifetime.Singleton);
             builder.Register<InputController>(Lifetime.Singleton);
 
             builder.RegisterEntryPoint<GameFlow>();

@@ -21,6 +21,7 @@ namespace MyPong
         private readonly UnetWrapper UnetWrapper;
         private readonly CameraController CameraController;
         private readonly PongCoreController PongCoreController;
+        private readonly PongBoostersController PongBoostersController;
         private readonly InputController InputController;
 
         private CompositeDisposable _disposables = new();
@@ -31,6 +32,7 @@ namespace MyPong
             UnetWrapper unetWrapper,
             CameraController cameraController,
             PongCoreController pongCoreController,
+            PongBoostersController pongBoostersController,
             InputController inputController)
         {
             PopupService = popupService;
@@ -38,6 +40,7 @@ namespace MyPong
             UnetWrapper = unetWrapper;
             CameraController = cameraController;
             PongCoreController = pongCoreController;
+            PongBoostersController = pongBoostersController;
             InputController = inputController;
         }
 
@@ -131,6 +134,7 @@ namespace MyPong
             if (value)
             {
                 PongCoreController.StartCoreGameplay();
+                PongBoostersController.StartBoosters();
                 await UniTask.WhenAll(
                     PopupService.CloseAll<WaitClientsPopup>(),
                     PopupService.OpenPopup<StartTimerPopup>(new StartTimerPopup.Data(
@@ -139,6 +143,7 @@ namespace MyPong
             }
             else
             {
+                PongBoostersController.StopBoosters();
                 PongCoreController.StopCoreGameplay();
                 await UniTask.WhenAll(
                     PopupService.CloseAll<StartTimerPopup>(),

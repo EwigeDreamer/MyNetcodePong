@@ -10,6 +10,7 @@ namespace MyPong.Core.Objects
     {
         public readonly List<BaseBoosterEffect> Effects = new();
 
+        public int id;
         public Vector2 position;
         public Vector2 direction;
         public float radius;
@@ -26,6 +27,7 @@ namespace MyPong.Core.Objects
 
         public Ball(Vector2 position, float radius)
         {
+            id = default;
             this.position = position;
             this.radius = radius;
             this.direction = default;
