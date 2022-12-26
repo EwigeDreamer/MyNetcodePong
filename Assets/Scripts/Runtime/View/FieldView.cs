@@ -9,7 +9,7 @@ namespace MyPong.View
 {
     public class FieldView : NetworkBehaviour, IUpdatableView
     {
-        private Subject<(FieldView field, Vector2 scale)> _onChangeScale = new();
+        private readonly Subject<(FieldView field, Vector2 scale)> _onChangeScale = new();
         public IObservable<(FieldView field, Vector2 scale)> OnChangeScale => _onChangeScale;
 
         [SerializeField] private Transform _square;

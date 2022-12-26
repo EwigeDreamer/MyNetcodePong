@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Extensions.Vectors;
@@ -19,6 +20,11 @@ namespace MyPong.Core
         private PongView _view;
 
         private CompositeDisposable _disposable;
+        private int[] _scores = new int[2];
+
+        private readonly Subject<int> _onGoal = new();
+        public IObservable<int> OnGoal => _onGoal;
+        public IReadOnlyList<int> Scores => _scores;
 
         public bool IsRunning => _core != null;
 
@@ -48,14 +54,22 @@ namespace MyPong.Core
             _disposable?.Dispose();
             _disposable = new();
 
+            _scores[0] = 0;
+            _scores[1] = 0;
+            _core.OnGoal.Where(id => id == 0).Subscribe(_ => _scores[0]++).AddTo(_disposable);
+            _core.OnGoal.Where(id => id == 1).Subscribe(_ => _scores[1]++).AddTo(_disposable);
+
+            _core.OnGoal.Subscribe(_onGoal.OnNext).AddTo(_disposable);
             var players = UnetWrapper.GetAllPlayers();
             
             var player0 = players.First(a => UnetWrapper.ItsMe(a.OwnerClientId));
             player0.OnPositionControl.Subscribe(v => SetPaddleTargetPosition(0, v)).AddTo(_disposable);
+            _core.OnGoal.Subscribe(_ => player0.SetScoreClientRpc(_scores[0], _scores[1])).AddTo(_disposable);
             
 #if !PONG_BOT
             var player1 = players.First(a => !UnetWrapper.ItsMe(a.OwnerClientId));
             player1.OnPositionControl.Subscribe(v => SetPaddleTargetPosition(1, -v)).AddTo(_disposable);
+            _core.OnGoal.Subscribe(_ => player1.SetScoreClientRpc(_scores[1], _scores[0])).AddTo(_disposable);
 #endif
 
             await UniTask.Delay(Constants.Gameplay.StartTimerSeconds * 1000);

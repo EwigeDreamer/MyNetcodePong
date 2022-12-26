@@ -68,6 +68,13 @@ namespace MyPong.Networking
                 .ToList();
         }
 
+        public NetworkPlayer GetLocalPlayer()
+        {
+            return NetworkManager.ConnectedClientsList
+                .Select(a => a.PlayerObject.GetComponent<NetworkPlayer>())
+                .FirstOrDefault(a => ItsMe(a.OwnerClientId));
+        }
+
         private Tween _connectWaiter = null;
         private void StartConnectScreenLocker()
         {

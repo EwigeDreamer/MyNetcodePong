@@ -8,8 +8,26 @@ namespace MyPong.Networking
 {
     public class NetworkPlayer : NetworkBehaviour
     {
+        public readonly ReactiveProperty<int> MyScoreRx = new(0);
+        public readonly ReactiveProperty<int> EnemyScoreRx = new(0);
+
         private Subject<float> _onPositionControl = new();
         public IObservable<float> OnPositionControl => _onPositionControl;
+        
+        
+        [ServerRpc]
+        public void ControlPositionServerRpc(float position)
+        {
+            _onPositionControl.OnNext(position);
+        }
+
+        [ClientRpc]
+        public void SetScoreClientRpc(int myScore, int enemyScore)
+        {
+            MyScoreRx.Value = myScore;
+            EnemyScoreRx.Value = enemyScore;
+        }
+        
 
         public override void OnNetworkSpawn()
         {
@@ -21,15 +39,6 @@ namespace MyPong.Networking
             DespawnDebug();
         }
 
-
-        [ServerRpc]
-        public void ControlPositionServerRpc(float position)
-        {
-            _onPositionControl.OnNext(position);
-        }
-        
-        
-        
         private void SpawnDebug()
         {
             var log = $"SPAWN!!!".Bold().Color(Color.cyan) + "\n";

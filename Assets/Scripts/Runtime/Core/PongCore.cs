@@ -4,6 +4,7 @@ using Extensions.Vectors;
 using MyPong.Core.Interfaces;
 using MyPong.Core.Objects;
 using MyPong.Core.Physics;
+using UniRx;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -15,8 +16,11 @@ namespace MyPong.Core
         public readonly IReadOnlyList<Paddle> Paddles;
         public readonly Ball Ball;
 
-        public event Action<int> OnGoal;
-        public event Action<Ball, Vector2> OnBallBounce;
+        private readonly Subject<int> _onGoal = new();
+        private readonly Subject<(Ball ball, Vector2 point)> _onBallBounce = new();
+        
+        public IObservable<int> OnGoal => _onGoal;
+        public IObservable<(Ball ball, Vector2 point)> OnBallBounce => _onBallBounce;
 
         private readonly float StartBallSpeed; 
         private readonly float BallSpeedIncrease; 
@@ -118,7 +122,7 @@ namespace MyPong.Core
                 var cast = new Capsule(ball.position, start + step, ball.radius);
                 if (CastHelper.CircleCast(goal.Collider, cast, out var point, out var normal, out _))
                 {
-                    OnGoal?.Invoke(goal.Id);
+                    _onGoal.OnNext(goal.Id);
                     ResetBall();
                     return;
                 }
@@ -133,7 +137,7 @@ namespace MyPong.Core
             {
                 if (CheckCast(ball, wall, ref step, ref left, out var point))
                 {
-                    OnBallBounce?.Invoke(ball, point);
+                    _onBallBounce.OnNext((ball, point));
                     CastBallRecursively(ball, ref step, ref left);
                     return;
                 }
@@ -142,7 +146,7 @@ namespace MyPong.Core
             {
                 if (CheckCast(ball, paddle, ref step, ref left, out var point))
                 {
-                    OnBallBounce?.Invoke(ball, point);
+                    _onBallBounce.OnNext((ball, point));
                     ball.SpeedUp();
                     
                     //трение

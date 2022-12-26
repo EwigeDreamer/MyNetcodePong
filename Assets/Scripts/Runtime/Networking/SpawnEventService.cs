@@ -8,8 +8,8 @@ namespace MyPong.Networking
 {
     public class SpawnEventService : MonoSingleton<SpawnEventService>
     {
-        private Subject<NetworkObject> _onSpawnNetworkObject = new();
-        private Subject<NetworkObject> _onDespawnNetworkObject = new();
+        private readonly Subject<NetworkObject> _onSpawnNetworkObject = new();
+        private readonly Subject<NetworkObject> _onDespawnNetworkObject = new();
         
         public IObservable<NetworkObject> OnSpawnNetworkObject => _onSpawnNetworkObject;
         public IObservable<NetworkObject> OnDespawnNetworkObject => _onDespawnNetworkObject;
