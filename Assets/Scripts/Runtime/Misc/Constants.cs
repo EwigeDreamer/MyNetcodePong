@@ -16,5 +16,10 @@ namespace MyPong
             public const int PlayersCount = 2;
 #endif
         }
+        
+        public static class Gameplay
+        {
+            public const int StartTimerSeconds = 3;
+        }
     }
 }

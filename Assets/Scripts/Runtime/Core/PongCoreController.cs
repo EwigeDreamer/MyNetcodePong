@@ -29,7 +29,7 @@ namespace MyPong.Core
         }
         
         //запускается только на HOST'е
-        public void StartCoreGameplay()
+        public async void StartCoreGameplay()
         {
             if (_core != null) return;
             var ratio = new Vector2(9f, 16f);
@@ -45,10 +45,6 @@ namespace MyPong.Core
             _view = new(_core);
             _view.Init().Forget();
 
-            _disposable?.Dispose();
-            _disposable = new();
-            Observable.EveryUpdate().Subscribe(Update).AddTo(_disposable);
-
             var players = UnetWrapper.GetAllPlayers();
             
             var player0 = players.First(a => UnetWrapper.ItsMe(a.OwnerClientId));
@@ -58,6 +54,12 @@ namespace MyPong.Core
             var player1 = players.First(a => !UnetWrapper.ItsMe(a.OwnerClientId));
             player1.OnPositionControl.Subscribe(v => SetPaddleTargetPosition(1, -v)).AddTo(_disposable);
 #endif
+
+            await UniTask.Delay(Constants.Gameplay.StartTimerSeconds * 1000);
+
+            _disposable?.Dispose();
+            _disposable = new();
+            Observable.EveryUpdate().Subscribe(Update).AddTo(_disposable);
         }
 
         private void SetPaddleTargetPosition(int id, float position)

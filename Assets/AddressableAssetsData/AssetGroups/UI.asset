@@ -47,6 +47,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - ui
+  - m_GUID: 7a6561df41ecd49c9a88993bae7d9146
+    m_Address: UI/Popups/StartTimerPopup
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ui
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: b868af7ab74f44f9d94f1c59b20f93c4, type: 2}
   m_SchemaSet:

@@ -106,7 +106,6 @@ namespace MyPong.Networking
             }
             if (!IsServer || ItsMe(id))
             {
-                // NetworkManager.Shutdown();
                 _onDisconnectFromServer.OnNext(id);
             }
         }

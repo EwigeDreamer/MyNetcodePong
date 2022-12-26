@@ -78,13 +78,17 @@ namespace MyPong
             if (!UnetWrapper.IsServer)
             {
                 await UniTask.WhenAll(
-                    PopupService.OpenPopup<GameHudPopup>());
+                    PopupService.OpenPopup<StartTimerPopup>(
+                        new StartTimerPopup.Data(
+                            Constants.Gameplay.StartTimerSeconds,
+                            () => PopupService.OpenPopup<GameHudPopup>())));
             }
         }
 
         private async void OnDisconnectFromServer(ulong id)
         {
             await UniTask.WhenAll(
+                PopupService.CloseAll<StartTimerPopup>(),
                 PopupService.CloseAll<GameHudPopup>());
         }
 
@@ -95,12 +99,15 @@ namespace MyPong
                 PongCoreController.StartCoreGameplay();
                 await UniTask.WhenAll(
                     PopupService.CloseAll<WaitClientsPopup>(),
-                    PopupService.OpenPopup<GameHudPopup>());
+                    PopupService.OpenPopup<StartTimerPopup>(new StartTimerPopup.Data(
+                        Constants.Gameplay.StartTimerSeconds,
+                        () => PopupService.OpenPopup<GameHudPopup>())));
             }
             else
             {
                 PongCoreController.StopCoreGameplay();
                 await UniTask.WhenAll(
+                    PopupService.CloseAll<StartTimerPopup>(),
                     PopupService.CloseAll<GameHudPopup>(),
                     PopupService.OpenPopup<WaitClientsPopup>());
             }
@@ -119,6 +126,7 @@ namespace MyPong
         private async void OnShutdown(Unit _)
         {
             await UniTask.WhenAll(
+                PopupService.CloseAll<StartTimerPopup>(),
                 PopupService.CloseAll<GameHudPopup>(),
                 PopupService.CloseAll<WaitClientsPopup>());
         }
