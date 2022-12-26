@@ -70,9 +70,7 @@ namespace MyPong.Networking
 
         public NetworkPlayer GetLocalPlayer()
         {
-            return NetworkManager.ConnectedClientsList
-                .Select(a => a.PlayerObject.GetComponent<NetworkPlayer>())
-                .FirstOrDefault(a => ItsMe(a.OwnerClientId));
+            return NetworkManager.LocalClient?.PlayerObject?.GetComponent<NetworkPlayer>();
         }
 
         private Tween _connectWaiter = null;
