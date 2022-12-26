@@ -49,7 +49,7 @@ namespace MyPong.Networking
 
         private void SpawnDebug()
         {
-            var log = $"SPAWN!!!".Bold().Color(Color.cyan) + "\n";
+            var log = $"Spawn Player".Bold().Color(Color.cyan) + "\n";
             log += $"{nameof(IsOwner)}: {IsOwner}\n";
             log += $"{nameof(IsServer)}: {IsServer}\n";
             log += $"{nameof(IsClient)}: {IsClient}\n";
@@ -62,7 +62,7 @@ namespace MyPong.Networking
 
         private void DespawnDebug()
         {
-            var log = $"DESPAWN!!!".Bold().Color(Color.yellow) + "\n";
+            var log = $"Despawn Player".Bold().Color(Color.yellow) + "\n";
             log += $"{nameof(IsOwner)}: {IsOwner}\n";
             log += $"{nameof(IsServer)}: {IsServer}\n";
             log += $"{nameof(IsClient)}: {IsClient}\n";
