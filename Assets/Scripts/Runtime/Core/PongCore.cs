@@ -21,10 +21,12 @@ namespace MyPong.Core
         private readonly Subject<int> _onGoal = new();
         private readonly Subject<(Ball ball, Vector2 point)> _onBallBounce = new();
         private readonly Subject<ICastable> _onCustomCast = new();
+        private readonly Subject<(Ball ball, Vector2 point)> _onBallReset = new();
 
         public IObservable<int> OnGoal => _onGoal;
         public IObservable<(Ball ball, Vector2 point)> OnBallBounce => _onBallBounce;
         public IObservable<ICastable> OnCustomCast => _onCustomCast;
+        public IObservable<(Ball ball, Vector2 point)> OnBallReset => _onBallReset;
 
         private readonly float StartBallSpeed;
         private readonly float BallSpeedIncrease;
@@ -78,6 +80,7 @@ namespace MyPong.Core
                 .normalized;
             Ball.speed = StartBallSpeed;
             Ball.speedIncrease = BallSpeedIncrease;
+            _onBallReset.OnNext((Ball, Ball.position));
         }
 
         private void MovePaddle(Paddle paddle, float deltaTime)
