@@ -44,6 +44,9 @@ namespace MyPong.Core
                 1f);
             _view = new(_core);
             _view.Init().Forget();
+            
+            _disposable?.Dispose();
+            _disposable = new();
 
             var players = UnetWrapper.GetAllPlayers();
             
@@ -56,9 +59,6 @@ namespace MyPong.Core
 #endif
 
             await UniTask.Delay(Constants.Gameplay.StartTimerSeconds * 1000);
-
-            _disposable?.Dispose();
-            _disposable = new();
             Observable.EveryUpdate().Subscribe(Update).AddTo(_disposable);
         }
 
