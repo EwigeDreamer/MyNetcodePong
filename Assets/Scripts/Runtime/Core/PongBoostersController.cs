@@ -27,7 +27,9 @@ namespace MyPong.Core
         {
             _interval?.Dispose();
             _interval = new();
-            Observable.Interval(TimeSpan.FromSeconds(1f)).Subscribe(_ => CreateBooster()).AddTo(_interval);
+            Observable.Interval(TimeSpan.FromSeconds(Constants.Gameplay.BoostersSpawnInterval))
+                .Subscribe(_ => CreateBooster())
+                .AddTo(_interval);
         }
 
         public void StopBoosters()
