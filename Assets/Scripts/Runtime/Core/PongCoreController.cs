@@ -77,6 +77,7 @@ namespace MyPong.Core
             await UniTask.Delay((Constants.Gameplay.StartTimerSeconds + 1) * 1000);
             _core.OnGoal.Subscribe(_ => CheckScore()).AddTo(_disposable);
             Observable.EveryUpdate().Subscribe(Update).AddTo(_disposable);
+            Resume();
         }
 
         private void CheckScore()

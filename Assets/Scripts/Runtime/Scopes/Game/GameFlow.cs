@@ -139,12 +139,13 @@ namespace MyPong
             }
             else
             {
-                await UniTask.WaitWhile(() => PopupService.HasPopup<GameOverPopup>());
                 PongCoreController.StopCoreGameplay();
                 await UniTask.WhenAll(
                     PopupService.CloseAll<StartTimerPopup>(),
-                    PopupService.CloseAll<GameHudPopup>(),
-                    PopupService.OpenPopup<WaitClientsPopup>());
+                    PopupService.CloseAll<GameHudPopup>());
+                await UniTask.WaitWhile(() => PopupService.HasPopup<GameOverPopup>());
+                if (UnetWrapper.IsServer && UnetWrapper.IsRunning)
+                    await PopupService.OpenPopup<WaitClientsPopup>();
             }
         }
 
