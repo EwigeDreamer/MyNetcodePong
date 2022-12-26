@@ -13,11 +13,6 @@ namespace MyPong.View
         
         private Ball _ball;
 
-        private void Awake()
-        {
-            throw new NotImplementedException();
-        }
-
         public BallView Init(Ball ball)
         {
             _ball = ball;
