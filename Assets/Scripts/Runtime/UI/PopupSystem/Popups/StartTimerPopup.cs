@@ -53,8 +53,8 @@ namespace MyPong.UI.Popups
             counter.AppendCallback(() =>
             {
                 _counter = null;
-                ClosePopup();
                 PopupData?.OnComplete?.Invoke();
+                ClosePopup();
             });
             _counter = counter.Play();
         }
