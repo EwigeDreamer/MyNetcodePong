@@ -32,6 +32,21 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - view
+  - m_GUID: 5158c9a84d95948d0a5b61bb99d4de7a
+    m_Address: Views/ExpandPaddleView
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - view
+  - m_GUID: 9951a4912158445c8a8f6ef7660d869a
+    m_Address: Views/NarrowPaddleView
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - view
+  - m_GUID: b17087cca2d594345886f2a28e9700ef
+    m_Address: Views/SpeedBallView
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - view
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: b868af7ab74f44f9d94f1c59b20f93c4, type: 2}
   m_SchemaSet:
