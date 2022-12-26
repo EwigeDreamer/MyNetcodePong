@@ -29,6 +29,7 @@ namespace MyPong.UI.Popups
 
         private bool _inProcess = false;
 
+
         public async UniTask OpenPopup<T>(IPopupData data = null) where T : BasePopup
         {
             Debug.Log($"Try to open popup {typeof(T).Name.Bold()}");
@@ -88,6 +89,14 @@ namespace MyPong.UI.Popups
             foreach (var p in _popups.Select(a => a).Reverse())
                 if (p.Popup is T)
                     await ClosePopup(p.Popup);
+        }
+
+        public bool HasPopup<T>() where T : BasePopup
+        {
+            foreach(var p in _popups)
+                if (p.Popup is T)
+                    return true;
+            return false;
         }
 
         private bool CanOpenNew<T>() where T : BasePopup

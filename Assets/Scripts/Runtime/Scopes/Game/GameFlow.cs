@@ -98,11 +98,12 @@ namespace MyPong
             var myScore = player.MyScoreRx.Value;
             var enemyScore = player.EnemyScoreRx.Value;
             if (myScore > enemyScore)
-                await PopupService.OpenPopup<MessagePopup>(new MessagePopup.Data("You won!", UnetWrapper.Shutdown));
+                await PopupService.OpenPopup<GameOverPopup>(new GameOverPopup.Data("You won!"));
             else if (myScore < enemyScore)
-                await PopupService.OpenPopup<MessagePopup>(new MessagePopup.Data("You lose!", UnetWrapper.Shutdown));
+                await PopupService.OpenPopup<GameOverPopup>(new GameOverPopup.Data("You lose!"));
             else
-                await PopupService.OpenPopup<MessagePopup>(new MessagePopup.Data("Tie... How?", UnetWrapper.Shutdown));
+                await PopupService.OpenPopup<GameOverPopup>(new GameOverPopup.Data("Tie... How?"));
+            UnetWrapper.Shutdown();
         }
 
         private async void OnConnectedToServer(ulong id)
@@ -138,6 +139,7 @@ namespace MyPong
             }
             else
             {
+                await UniTask.WaitWhile(() => PopupService.HasPopup<GameOverPopup>());
                 PongCoreController.StopCoreGameplay();
                 await UniTask.WhenAll(
                     PopupService.CloseAll<StartTimerPopup>(),

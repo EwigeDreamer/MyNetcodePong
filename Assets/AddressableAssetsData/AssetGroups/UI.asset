@@ -52,6 +52,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - ui
+  - m_GUID: 9397fb87d96dc44488299f45d56f0fe3
+    m_Address: UI/Popups/GameOverPopup
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ui
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: b868af7ab74f44f9d94f1c59b20f93c4, type: 2}
   m_SchemaSet:
