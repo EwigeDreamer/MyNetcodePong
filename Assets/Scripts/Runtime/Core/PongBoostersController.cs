@@ -78,7 +78,7 @@ namespace MyPong.Core
         {
             if (!CanProcess) return default;
             var core = PongCoreController.Core;
-            var xRange = core.Field.Size.x;
+            var xRange = core.Field.Size.x - 1f;
             var yRange = core.Field.Size.y * 0.1f;
             var x = Random.Range(-xRange, xRange);
             var y = Random.Range(-yRange, yRange);

@@ -21,15 +21,17 @@ namespace MyPong.View
         
         public void UpdateView()
         {
+            var width = _paddle.GetWidth();
+            
             transform.localPosition = _paddle.position;
             transform.localRotation = Quaternion.identity;
-            _circle1.localPosition = Vector3.left * _paddle.width / 2f;
-            _circle2.localPosition = Vector3.right * _paddle.width / 2f;
+            _circle1.localPosition = Vector3.left * width / 2f;
+            _circle2.localPosition = Vector3.right * width / 2f;
             _circle1.localScale = Vector3.one * _paddle.thickness;
             _circle2.localScale = Vector3.one * _paddle.thickness;
             _square.localPosition = Vector3.zero;
             _square.localRotation = Quaternion.identity;
-            _square.localScale = new Vector3(_paddle.width, _paddle.thickness, 1f);
+            _square.localScale = new Vector3(width, _paddle.thickness, 1f);
         }
     }
 }

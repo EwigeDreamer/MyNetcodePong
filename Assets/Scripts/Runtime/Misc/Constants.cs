@@ -21,7 +21,7 @@ namespace MyPong
         {
             public const int StartTimerSeconds = 3;
             public const int MaxScore = 10;
-            public const float BoostersSpawnInterval = 10f;
+            public const float BoostersSpawnInterval = 20f;
         }
     }
 }
