@@ -74,7 +74,7 @@ namespace MyPong.Core
             player1.OnPositionControl.Subscribe(v => SetPaddleTargetPosition(1, -v)).AddTo(_disposable);
             _core.OnGoal.Subscribe(_ => player1.SetScoreClientRpc(_scores[1], _scores[0])).AddTo(_disposable);
 #endif
-            await UniTask.Delay(Constants.Gameplay.StartTimerSeconds * 1000);
+            await UniTask.Delay((Constants.Gameplay.StartTimerSeconds + 1) * 1000);
             _core.OnGoal.Subscribe(_ => CheckScore()).AddTo(_disposable);
             Observable.EveryUpdate().Subscribe(Update).AddTo(_disposable);
         }

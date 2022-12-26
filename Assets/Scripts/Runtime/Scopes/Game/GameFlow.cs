@@ -99,7 +99,7 @@ namespace MyPong
             var enemyScore = player.EnemyScoreRx.Value;
             if (myScore > enemyScore)
                 await PopupService.OpenPopup<MessagePopup>(new MessagePopup.Data("You won!", UnetWrapper.Shutdown));
-            else if (myScore > enemyScore)
+            else if (myScore < enemyScore)
                 await PopupService.OpenPopup<MessagePopup>(new MessagePopup.Data("You lose!", UnetWrapper.Shutdown));
             else
                 await PopupService.OpenPopup<MessagePopup>(new MessagePopup.Data("Tie... How?", UnetWrapper.Shutdown));
